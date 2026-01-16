@@ -237,4 +237,200 @@ class StoreService: ObservableObject {
             self.fetchMenu()
         }
     }
+    
+    // MARK: - CSV Export/Import
+    func exportOrdersToCSV() -> String {
+        print("📊 Exporting \(orders.count) orders to CSV")
+        var csvString = "Date\tTime\tOrder\tQuantity\tCost\tName\tStatus\tNotes\tSource\n"
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        let displayDateFormatter = DateFormatter()
+        displayDateFormatter.dateFormat = "EEEE, MMMM d, yyyy"
+        
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "HH:mm"
+        
+        let displayTimeFormatter = DateFormatter()
+        displayTimeFormatter.dateFormat = "h:mm a"
+        
+        for order in orders.sorted(by: { $0.pickupDate < $1.pickupDate }) {
+            // Convert pickup date to display format
+            let displayDate: String
+            if let date = dateFormatter.date(from: order.pickupDate) {
+                displayDate = displayDateFormatter.string(from: date)
+            } else {
+                displayDate = order.pickupDate
+            }
+            
+            // Convert pickup time to display format
+            let displayTime: String
+            if let time = timeFormatter.date(from: order.pickupTime) {
+                displayTime = displayTimeFormatter.string(from: time)
+            } else {
+                displayTime = order.pickupTime
+            }
+            
+            let row = [
+                displayDate,
+                displayTime,
+                order.itemName,
+                "\(order.quantity)",
+                String(format: "$%.2f", order.total),
+                order.customerName,
+                order.status.capitalized,
+                order.notes,
+                order.source
+            ].joined(separator: "\t")
+            
+            csvString += row + "\n"
+        }
+        
+        return csvString
+    }
+    
+    func importOrdersFromCSV(_ csvString: String) {
+        guard let uid = auth.currentUser?.uid else { return }
+        
+        let lines = csvString.components(separatedBy: "\n")
+        guard lines.count > 1 else { return }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "EEEE, MMMM d, yyyy"
+        
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "h:mm a"
+        
+        let timeFormatter24 = DateFormatter()
+        timeFormatter24.dateFormat = "HH:mm"
+        
+        let storageDateFormatter = DateFormatter()
+        storageDateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        let storageTimeFormatter = DateFormatter()
+        storageTimeFormatter.dateFormat = "HH:mm"
+        
+        var importCount = 0
+        var errorCount = 0
+        
+        // Skip header row
+        for i in 1..<lines.count {
+            let line = lines[i].trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !line.isEmpty else { continue }
+            
+            let fields = line.components(separatedBy: "\t").map { $0.trimmingCharacters(in: .whitespaces) }
+            guard fields.count >= 9 else { 
+                print("⚠️ Skipping invalid row \(i): expected 9 fields, got \(fields.count)")
+                errorCount += 1
+                continue 
+            }
+            
+            // Parse date
+            let pickupDate: String
+            if let date = dateFormatter.date(from: fields[0]) {
+                pickupDate = storageDateFormatter.string(from: date)
+            } else {
+                pickupDate = fields[0]
+            }
+            
+            // Parse time - support both "3:00 PM" and "15:00" formats
+            let pickupTime: String
+            if let time = timeFormatter.date(from: fields[1]) {
+                pickupTime = storageTimeFormatter.string(from: time)
+            } else if let time = timeFormatter24.date(from: fields[1]) {
+                pickupTime = storageTimeFormatter.string(from: time)
+            } else {
+                pickupTime = fields[1]
+            }
+            
+            // Parse cost - handle both "$10.00" and "10" formats, trim whitespace
+            let costString = fields[4]
+                .replacingOccurrences(of: "$", with: "")
+                .trimmingCharacters(in: .whitespaces)
+            
+            let cost = Double(costString) ?? 0.0
+            
+            if cost == 0.0 {
+                print("⚠️ Row \(i): Could not parse cost from '\(fields[4])' (cleaned: '\(costString)')")
+            }
+            
+            let order = CakeOrder(
+                itemName: fields[2],
+                customerName: fields[5],
+                quantity: Int(fields[3]) ?? 1,
+                total: cost,
+                notes: fields[7],
+                source: fields[8],
+                timestamp: ISO8601DateFormatter().string(from: Date()),
+                pickupDate: pickupDate,
+                pickupTime: pickupTime,
+                status: fields[6].lowercased()
+            )
+            
+            // Add to Firestore
+            do {
+                _ = try db.collection("users").document(uid).collection("orders").addDocument(from: order)
+                importCount += 1
+            } catch {
+                print("❌ Error importing order row \(i): \(error.localizedDescription)")
+                errorCount += 1
+            }
+        }
+        
+        print("✅ Import complete: \(importCount) orders imported, \(errorCount) errors")
+        
+        // Refresh orders after import
+        fetchOrders()
+    }
+    
+    func exportMenuToCSV() -> String {
+        print("🍰 Exporting \(menuItems.count) menu items to CSV")
+        var csvString = "Item Name\tBase Price\n"
+        
+        for item in menuItems.sorted(by: { $0.name < $1.name }) {
+            let row = [
+                item.name,
+                String(format: "$%.2f", item.basePrice)
+            ].joined(separator: "\t")
+            
+            csvString += row + "\n"
+        }
+        
+        return csvString
+    }
+    
+    func importMenuFromCSV(_ csvString: String) {
+        guard let uid = auth.currentUser?.uid else { return }
+        
+        let lines = csvString.components(separatedBy: "\n")
+        guard lines.count > 1 else { return }
+        
+        // Skip header row
+        for i in 1..<lines.count {
+            let line = lines[i].trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !line.isEmpty else { continue }
+            
+            let fields = line.components(separatedBy: "\t")
+            guard fields.count >= 2 else { continue }
+            
+            // Parse price (remove $ sign)
+            let priceString = fields[1].replacingOccurrences(of: "$", with: "")
+            
+            let menuItem = CakeItem(
+                name: fields[0],
+                basePrice: Double(priceString) ?? 0.0
+            )
+            
+            // Add to Firestore
+            do {
+                _ = try db.collection("users").document(uid).collection("menu").addDocument(from: menuItem)
+            } catch {
+                print("Error importing menu item: \(error.localizedDescription)")
+            }
+        }
+        
+        // Refresh menu after import
+        fetchMenu()
+    }
 }

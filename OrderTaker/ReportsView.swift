@@ -3,6 +3,31 @@ import SwiftUI
 struct ReportsView: View {
     @EnvironmentObject var store: StoreService
     
+    let cakeItems = [
+        "Chocolate Cake (6\")",
+        "Red Velvet Cake (6\")",
+        "Red Velvet Cake (8\")",
+        "Sansrival Cake (6\")",
+        "Sansrival Cake (8\")",
+        "Ube Leche Flan Cake (6\")",
+        "Ube Leche Flan Cake (8\")",
+        "Ube Macapuno Cake (6\")",
+        "Ube Macapuno Cake (8\")",
+        "Custard Cake (8x8\")",
+        "Custard Cake (9x13)"
+    ]
+    
+    let dessertItems = [
+        "Brownies (8x8\")",
+        "Butterscotch Brownies (8x8\")",
+        "Butterscoth Brownies (8x8\")", // Typo variant
+        "Leche Flan",
+        "Cheese Rolls",
+        "Crinkles",
+        "Kuntsinta",
+        "Puto"
+    ]
+    
     var stats: Stats {
         let orders = store.orders
         let completed = orders.filter { $0.status == "completed" }
@@ -13,17 +38,36 @@ struct ReportsView: View {
         let totalOrders = orders.count
         let avgValue = totalOrders > 0 ? (revenue + pipeline) / Double(totalOrders) : 0
         
-        // Top Items
+        // All Items with counts
         var itemCounts: [String: Int] = [:]
         for o in orders { itemCounts[o.itemName, default: 0] += o.quantity }
-        let topItems = itemCounts.sorted { $0.value > $1.value }.prefix(5).map { ($0.key, $0.value) }
+        
+        // Categorize items
+        var cakes: [(String, Int)] = []
+        var desserts: [(String, Int)] = []
+        var other: [(String, Int)] = []
+        
+        for (itemName, count) in itemCounts {
+            if cakeItems.contains(itemName) {
+                cakes.append((itemName, count))
+            } else if dessertItems.contains(itemName) {
+                desserts.append((itemName, count))
+            } else {
+                other.append((itemName, count))
+            }
+        }
+        
+        // Sort each category by count descending
+        cakes.sort { $0.1 > $1.1 }
+        desserts.sort { $0.1 > $1.1 }
+        other.sort { $0.1 > $1.1 }
         
         // Sources
         var sourceCounts: [String: Int] = [:]
         for o in orders { sourceCounts[o.source, default: 0] += 1 }
         let sources = sourceCounts.map { ($0.key, $0.value) }
         
-        return Stats(revenue: revenue, pipeline: pipeline, totalOrders: totalOrders, avgValue: avgValue, topItems: topItems, sources: sources)
+        return Stats(revenue: revenue, pipeline: pipeline, totalOrders: totalOrders, avgValue: avgValue, cakes: cakes, desserts: desserts, other: other, sources: sources)
     }
     
     var body: some View {
@@ -44,48 +88,76 @@ struct ReportsView: View {
                 }
                 .padding(.horizontal, 24)
                 
-                // Top Items Chart
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("TOP SELLING ITEMS")
-                        .font(Theme.labelFont)
-                        .foregroundColor(Theme.Slate.s500)
-                    
-                    VStack(spacing: 16) {
-                        ForEach(stats.topItems, id: \.0) { item, count in
-                            HStack {
-                                Text(item)
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(Theme.Slate.s900)
-                                Spacer()
-                                Text("\(count)")
-                                    .font(.system(size: 14, weight: .black))
-                                    .foregroundColor(Theme.primary)
-                            }
-                            
-                            // Simple bar
-                            GeometryReader { geo in
-                                Capsule()
-                                    .fill(Theme.primary.opacity(0.1))
-                                    .frame(height: 8)
-                                    .overlay(
-                                        Capsule()
-                                            .fill(Theme.primary)
-                                            .frame(width: geo.size.width * CGFloat(min(Double(count) / 20.0, 1.0)), height: 8), // Norm to 20 for mock
-                                        alignment: .leading
-                                    )
-                            }
-                            .frame(height: 8)
-                        }
-                    }
+                // Cakes Section
+                if !stats.cakes.isEmpty {
+                    ItemCategorySection(title: "CAKES", items: stats.cakes, color: Theme.primary)
                 }
-                .padding(24)
-                .background(Color.white)
-                .cornerRadius(24)
-                .padding(.horizontal, 24)
-                .padding(.bottom, 100)
+                
+                // Desserts Section
+                if !stats.desserts.isEmpty {
+                    ItemCategorySection(title: "DESSERTS", items: stats.desserts, color: Theme.success)
+                }
+                
+                // Other Items Section
+                if !stats.other.isEmpty {
+                    ItemCategorySection(title: "OTHER ITEMS", items: stats.other, color: Theme.Slate.s600)
+                }
             }
+            .padding(.bottom, 100)
         }
         .background(Theme.background.ignoresSafeArea())
+    }
+}
+
+struct ItemCategorySection: View {
+    let title: String
+    let items: [(String, Int)]
+    let color: Color
+    
+    var maxCount: Int {
+        items.map { $0.1 }.max() ?? 1
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text(title)
+                .font(Theme.labelFont)
+                .foregroundColor(Theme.Slate.s500)
+            
+            VStack(spacing: 16) {
+                ForEach(items, id: \.0) { item, count in
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text(item)
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(Theme.Slate.s900)
+                            Spacer()
+                            Text("\(count)")
+                                .font(.system(size: 14, weight: .black))
+                                .foregroundColor(color)
+                        }
+                        
+                        // Simple bar
+                        GeometryReader { geo in
+                            Capsule()
+                                .fill(color.opacity(0.1))
+                                .frame(height: 8)
+                                .overlay(
+                                    Capsule()
+                                        .fill(color)
+                                        .frame(width: geo.size.width * CGFloat(Double(count) / Double(maxCount)), height: 8),
+                                    alignment: .leading
+                                )
+                        }
+                        .frame(height: 8)
+                    }
+                }
+            }
+        }
+        .padding(24)
+        .background(Color.white)
+        .cornerRadius(24)
+        .padding(.horizontal, 24)
     }
 }
 
@@ -117,7 +189,9 @@ struct Stats {
     let pipeline: Double
     let totalOrders: Int
     let avgValue: Double
-    let topItems: [(String, Int)]
+    let cakes: [(String, Int)]
+    let desserts: [(String, Int)]
+    let other: [(String, Int)]
     let sources: [(String, Int)]
 }
 

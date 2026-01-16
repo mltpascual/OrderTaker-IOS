@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject var store = StoreService()
+    @AppStorage("isDarkMode") private var isDarkMode = false
     
     var body: some View {
         Group {
@@ -20,6 +21,7 @@ struct ContentView: View {
                     .environmentObject(store)
             }
         }
+        .preferredColorScheme(isDarkMode ? .dark : .light)
         .onAppear {
             store.signIn() // Starts listening to auth state
         }

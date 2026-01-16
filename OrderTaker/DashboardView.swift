@@ -3,6 +3,7 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject var store: StoreService
     @State private var selectedTab: String = "Today"
+    @State private var showingSettings = false
     
     private var todayStr: String {
         let formatter = DateFormatter()
@@ -51,6 +52,10 @@ struct DashboardView: View {
                     Spacer()
                     
                     HStack(spacing: 16) {
+                        Button(action: { showingSettings = true }) {
+                            Image(systemName: "gearshape.fill")
+                                .foregroundColor(Theme.Slate.s400)
+                        }
 
                         Button(action: { store.signOut() }) {
                             Image(systemName: "rectangle.portrait.and.arrow.right")
@@ -156,6 +161,10 @@ struct DashboardView: View {
             .navigationBarHidden(true)
             .sheet(item: $orderToEdit) { order in
                 OrderFormView(editingOrder: order)
+                    .environmentObject(store)
+            }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
                     .environmentObject(store)
             }
             .alert(isPresented: $showingDeleteAlert) {
