@@ -29,7 +29,7 @@ struct ReportsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
-                Text("Business Insights")
+                Text("Sales Report")
                     .font(Theme.headerFont)
                     .foregroundColor(Theme.Slate.s900)
                     .padding(.horizontal, 24)

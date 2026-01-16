@@ -31,6 +31,7 @@ struct ScaleButtonStyle: ButtonStyle {
 
 struct OrderCard: View {
     let order: CakeOrder
+    var onDuplicate: () -> Void = {}
     var onEdit: () -> Void = {}
     var onDelete: () -> Void = {}
     var onStatusChange: (String) -> Void = { _ in }
@@ -113,8 +114,8 @@ struct OrderCard: View {
                             .frame(width: 32, height: 32)
                     }
                     
-                    Button(action: onEdit) {
-                        Image(systemName: "pencil")
+                    Button(action: onDuplicate) {
+                        Image(systemName: "doc.on.doc")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(Theme.Slate.s400)
                             .frame(width: 32, height: 32)

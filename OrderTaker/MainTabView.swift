@@ -12,11 +12,11 @@ struct MainTabView: View {
                 if selectedTab == 0 {
                     DashboardView()
                 } else if selectedTab == 1 {
-                    MenuView()
+                    SummaryView()
                 } else if selectedTab == 2 {
-                    ReportsView()
+                    ReportsView() // Sales
                 } else if selectedTab == 3 {
-                    ProfileView()
+                    MenuView()
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -24,12 +24,12 @@ struct MainTabView: View {
             // Custom Bottom Tab Bar
             HStack(spacing: 0) {
                 HStack(spacing: 0) {
-                    TabItem(icon: "list.bullet.clipboard.fill", label: "Orders", isSelected: selectedTab == 0) {
+                    TabItem(icon: "tray.fill", label: "Orders", isSelected: selectedTab == 0) {
                         selectedTab = 0
                     }
                     .frame(maxWidth: .infinity)
                     
-                    TabItem(icon: "fork.knife", label: "Menu", isSelected: selectedTab == 1) {
+                    TabItem(icon: "list.clipboard", label: "Summary", isSelected: selectedTab == 1) {
                         selectedTab = 1
                     }
                     .frame(maxWidth: .infinity)
@@ -53,12 +53,12 @@ struct MainTabView: View {
                 .frame(width: 80)
                 
                 HStack(spacing: 0) {
-                    TabItem(icon: "chart.bar.fill", label: "Insights", isSelected: selectedTab == 2) {
+                    TabItem(icon: "chart.line.uptrend.xyaxis", label: "Sales", isSelected: selectedTab == 2) {
                         selectedTab = 2
                     }
                     .frame(maxWidth: .infinity)
                     
-                    TabItem(icon: "person.fill", label: "Profile", isSelected: selectedTab == 3) {
+                    TabItem(icon: "fork.knife", label: "Menu", isSelected: selectedTab == 3) {
                         selectedTab = 3
                     }
                     .frame(maxWidth: .infinity)
@@ -92,11 +92,12 @@ struct TabItem: View {
             VStack(spacing: 4) {
                 Image(systemName: icon)
                     .font(.system(size: 20))
+                    .frame(height: 24)
                 Text(label)
                     .font(.system(size: 10, weight: .bold))
             }
             .foregroundColor(isSelected ? Theme.primary : Theme.Slate.s400)
-            .frame(width: 60)
+            .frame(width: 60) // Keep width, height is implicit
         }
     }
 }

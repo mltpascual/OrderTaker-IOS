@@ -51,14 +51,7 @@ struct DashboardView: View {
                     Spacer()
                     
                     HStack(spacing: 16) {
-                        Button(action: {
-                            store.fetchOrders()
-                            store.fetchMenu()
-                        }) {
-                            Image(systemName: "arrow.clockwise")
-                                .foregroundColor(Theme.Slate.s400)
-                        }
-                        
+
                         Button(action: { store.signOut() }) {
                             Image(systemName: "rectangle.portrait.and.arrow.right")
                                 .foregroundColor(Theme.Slate.s400)
@@ -103,6 +96,11 @@ struct DashboardView: View {
                         ForEach(filteredOrders) { order in
                             OrderCard(
                                 order: order,
+                                onDuplicate: {
+                                    var newOrder = order
+                                    newOrder.id = nil
+                                    store.addOrder(newOrder)
+                                },
                                 onEdit: { orderToEdit = order },
                                 onDelete: {
                                     orderToDelete = order
@@ -118,13 +116,20 @@ struct DashboardView: View {
                             .listRowSeparator(.hidden)
                             .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                             .listRowBackground(Color.clear)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button(role: .destructive) {
                                     orderToDelete = order
                                     showingDeleteAlert = true
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
+                                
+                                Button {
+                                    orderToEdit = order
+                                } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }
+                                .tint(Theme.Slate.s400)
                             }
                             .swipeActions(edge: .leading) {
                                 if order.status == "pending" {

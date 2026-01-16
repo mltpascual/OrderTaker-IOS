@@ -49,10 +49,34 @@ struct OrderFormView: View {
                         Text("SELECT ITEM")
                             .fieldLabelStyle()
                         
-                        TextField("e.g. Chocolate Cake", text: $itemName)
+                        Menu {
+                            ForEach(store.menuItems.sorted { $0.name < $1.name }) { item in
+                                Button(item.name) {
+                                    itemName = item.name
+                                    let qty = Int(quantity) ?? 1
+                                    let price = item.basePrice * Double(qty)
+                                    total = String(format: "%.2f", price)
+                                }
+                            }
+                            
+                            // Custom Option
+                            Button("Custom Cake") {
+                                itemName = "Custom Cake"
+                                total = "" // Reset for manual entry
+                            }
+                        } label: {
+                            HStack {
+                                Text(itemName.isEmpty ? "Select Item" : itemName)
+                                    .foregroundColor(itemName.isEmpty ? Theme.Slate.s400 : Theme.Slate.s900)
+                                Spacer()
+                                Image(systemName: "chevron.down")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(Theme.Slate.s400)
+                            }
                             .padding(14)
                             .background(Theme.background)
                             .cornerRadius(12)
+                        }
                     }
                     
                     HStack(spacing: 16) {
@@ -64,6 +88,14 @@ struct OrderFormView: View {
                                 .padding(14)
                                 .background(Theme.background)
                                 .cornerRadius(12)
+                                .onChange(of: quantity) { newValue in
+                                    if itemName != "Custom Cake", 
+                                       let item = store.menuItems.first(where: { $0.name == itemName }) {
+                                        let qty = Int(newValue) ?? 0
+                                        let price = item.basePrice * Double(qty)
+                                        total = String(format: "%.2f", price)
+                                    }
+                                }
                         }
                         
                         VStack(alignment: .leading, spacing: 6) {
@@ -72,8 +104,10 @@ struct OrderFormView: View {
                             TextField("0.00", text: $total)
                                 .keyboardType(.decimalPad)
                                 .padding(14)
-                                .background(Theme.background)
+                                .background(itemName == "Custom Cake" ? Theme.background : Theme.Slate.s400.opacity(0.1))
+                                .foregroundColor(itemName == "Custom Cake" ? Theme.Slate.s900 : Theme.Slate.s500)
                                 .cornerRadius(12)
+                                .disabled(itemName != "Custom Cake")
                         }
                     }
                     

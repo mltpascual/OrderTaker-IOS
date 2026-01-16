@@ -175,10 +175,12 @@ class StoreService: ObservableObject {
     }
     
     // MARK: - Menu
+    // MARK: - Menu
     func fetchMenu() {
         guard let uid = auth.currentUser?.uid else { return }
         
         menuListener?.remove()
+        print("DEBUG: Starting menu listener for \(uid)")
         menuListener = db.collection("users").document(uid).collection("menu").addSnapshotListener { [weak self] querySnapshot, _ in
             guard let self = self else { return }
             guard let documents = querySnapshot?.documents else { return }
@@ -187,6 +189,52 @@ class StoreService: ObservableObject {
                 self.objectWillChange.send()
                 self.menuItems = documents.compactMap { try? $0.data(as: CakeItem.self) }
             }
+        }
+    }
+    
+    func addMenuItem(_ item: CakeItem) {
+        guard let uid = auth.currentUser?.uid else { return }
+        print("DEBUG: Adding menu item locally...")
+        
+        // Optimistic Update
+        self.menuItems.append(item)
+        
+        do {
+            _ = try db.collection("users").document(uid).collection("menu").addDocument(from: item)
+        } catch {
+            print("Error adding menu item: \(error.localizedDescription)")
+            self.fetchMenu()
+        }
+    }
+    
+    func deleteMenuItem(itemId: String) {
+        guard let uid = auth.currentUser?.uid else { return }
+        print("DEBUG: Deleting menu item \(itemId)")
+        
+        // Optimistic Update
+        DispatchQueue.main.async {
+            self.menuItems.removeAll { $0.id == itemId }
+        }
+        
+        db.collection("users").document(uid).collection("menu").document(itemId).delete()
+    }
+    
+    func updateMenuItem(_ item: CakeItem) {
+        guard let uid = auth.currentUser?.uid, let itemId = item.id else { return }
+        print("DEBUG: Updating menu item \(itemId)")
+        
+        // Optimistic Update
+        if let index = self.menuItems.firstIndex(where: { $0.id == itemId }) {
+            DispatchQueue.main.async {
+                self.menuItems[index] = item
+            }
+        }
+        
+        do {
+            try db.collection("users").document(uid).collection("menu").document(itemId).setData(from: item)
+        } catch {
+            print("Error updating menu item: \(error.localizedDescription)")
+            self.fetchMenu()
         }
     }
 }
