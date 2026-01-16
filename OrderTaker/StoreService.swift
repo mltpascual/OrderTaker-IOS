@@ -95,9 +95,10 @@ class StoreService: ObservableObject {
         
         ordersListener?.remove()
         print("DEBUG: Starting orders listener for \(uid)")
+        
+        // Remove ordering from Firestore query to avoid composite index requirement
+        // Orders will be sorted in the UI layer instead
         ordersListener = db.collection("users").document(uid).collection("orders")
-            .order(by: "pickupDate")
-            .order(by: "pickupTime")
             .addSnapshotListener { [weak self] querySnapshot, error in
                 guard let self = self else { return }
                 guard let documents = querySnapshot?.documents else {
@@ -108,7 +109,14 @@ class StoreService: ObservableObject {
                 print("DEBUG: Real-time update: \(documents.count) orders synced.")
                 DispatchQueue.main.async {
                     self.objectWillChange.send()
+                    // Sort orders by pickup date and time in-memory
                     self.orders = documents.compactMap { try? $0.data(as: CakeOrder.self) }
+                        .sorted { order1, order2 in
+                            if order1.pickupDate == order2.pickupDate {
+                                return order1.pickupTime < order2.pickupTime
+                            }
+                            return order1.pickupDate < order2.pickupDate
+                        }
                 }
             }
     }
