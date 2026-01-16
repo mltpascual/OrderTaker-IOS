@@ -1,0 +1,106 @@
+import SwiftUI
+
+struct MainTabView: View {
+    @EnvironmentObject var store: StoreService
+    @State private var selectedTab: Int = 0
+    @State private var showingOrderForm = false
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            // Content
+            Group {
+                if selectedTab == 0 {
+                    DashboardView()
+                } else if selectedTab == 1 {
+                    MenuView()
+                } else if selectedTab == 2 {
+                    ReportsView()
+                } else if selectedTab == 3 {
+                    ProfileView()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            // Custom Bottom Tab Bar
+            HStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    TabItem(icon: "list.bullet.clipboard.fill", label: "Orders", isSelected: selectedTab == 0) {
+                        selectedTab = 0
+                    }
+                    .frame(maxWidth: .infinity)
+                    
+                    TabItem(icon: "fork.knife", label: "Menu", isSelected: selectedTab == 1) {
+                        selectedTab = 1
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .frame(maxWidth: .infinity)
+                
+                // Central Add Button
+                Button(action: { showingOrderForm = true }) {
+                    ZStack {
+                        Circle()
+                            .fill(Theme.primary)
+                            .frame(width: 56, height: 56)
+                            .shadow(color: Theme.primary.opacity(0.4), radius: 10, x: 0, y: 5)
+                        
+                        Image(systemName: "plus")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
+                .offset(y: -20)
+                .frame(width: 80)
+                
+                HStack(spacing: 0) {
+                    TabItem(icon: "chart.bar.fill", label: "Insights", isSelected: selectedTab == 2) {
+                        selectedTab = 2
+                    }
+                    .frame(maxWidth: .infinity)
+                    
+                    TabItem(icon: "person.fill", label: "Profile", isSelected: selectedTab == 3) {
+                        selectedTab = 3
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .padding(.horizontal, 40)
+            .padding(.top, 12)
+            .padding(.bottom, 34)
+            .background(
+                Color.white
+                    .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
+            )
+        }
+        .ignoresSafeArea(.all, edges: .bottom)
+        .sheet(isPresented: $showingOrderForm) {
+            OrderFormView()
+                .environmentObject(store)
+        }
+    }
+}
+
+struct TabItem: View {
+    let icon: String
+    let label: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 20))
+                Text(label)
+                    .font(.system(size: 10, weight: .bold))
+            }
+            .foregroundColor(isSelected ? Theme.primary : Theme.Slate.s400)
+            .frame(width: 60)
+        }
+    }
+}
+
+#Preview {
+    MainTabView()
+}
