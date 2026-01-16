@@ -94,6 +94,7 @@ OrderTaker is a comprehensive iOS application designed for bakery businesses to 
   <img src=".github/assets/screenshot_sales.png" width="200" alt="Sales Report" />
   <img src=".github/assets/screenshot_menu.png" width="200" alt="Menu Management" />
   <img src=".github/assets/screenshot_new_order.png" width="200" alt="New Order Form" />
+  <img src=".github/assets/screenshot_settings.png" width="200" alt="Settings" />
 </p>
 
 ## 📚 Documentation
