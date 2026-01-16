@@ -1,72 +1,88 @@
 # AI Agent Handover Protocol
 
 ## 🤖 Context for the Next Agent
-This document serves as the primary context injection point for any AI agent taking over development of the **OrderTaker PWA**. It summarizes the architectural decisions, file structure, and business logic constraints currently in place.
+This document serves as the primary context injection point for any AI agent taking over development of the **OrderTaker iOS App**. It summarizes the architectural decisions, file structure, and business logic constraints currently in place.
 
 ---
 
 ## 🏗️ Core Architecture (Crucial)
 
-### 1. Vite & ESM Setup
-*   **Environment**: This project uses **Vite** as the build tool and development server.
-*   **Dependencies**: Packages are managed via `npm` and installed in `node_modules`.
-*   **Configuration**: Environment variables are managed via `.env` files. Use `import.meta.env.VITE_*` in the code.
+### 1. Swift & Xcode Setup
+*   **Environment**: This project is a **native iOS application** built with **SwiftUI** and managed via **Xcode**.
+*   **Dependencies**: Packages are managed via **Swift Package Manager (SPM)** and include Firebase iOS SDK.
+*   **Build System**: Xcode project (`.xcodeproj`) with support for iOS 17.0+.
 
 ### 2. Backend Strategy (Firebase)
-*   **Auth**: Google & Email/Password.
-*   **Database**: Cloud Firestore.
-*   **Data Isolation**: All data is scoped to the user.
+*   **Auth**: Email/Password authentication via Firebase Auth iOS SDK.
+*   **Database**: Cloud Firestore with real-time listeners.
+*   **Data Isolation**: All data is scoped to the user via Firestore security rules.
     *   `users/{uid}/orders/{orderId}`
     *   `users/{uid}/menu/{menuId}`
-*   **Realtime**: State in `App.tsx` is driven by `onSnapshot` listeners. Do not rely on manual `fetch` calls for reading data; rely on the listener to update the state automatically.
+    *   `users/{uid}` (UserProfile document)
+*   **Realtime**: State in `StoreService` is driven by `addSnapshotListener`. The service acts as an `ObservableObject` and publishes changes to SwiftUI views. Do not rely on manual fetch calls; rely on the listeners to update `@Published` properties automatically.
 
 ---
 
 ## 📂 File System Map
 
-*   **`index.html`**: The shell. Contains the Import Map, Tailwind CDN, and Font imports.
-*   **`firebase.ts`**: Centralized export for all Firebase functions. Edit this if adding new Firebase services (e.g., Storage).
-*   **`App.tsx`**: The main controller.
-    *   Manages Global State (`orders`, `menu`).
-    *   Handles Routing (via `activeTab` state).
-    *   Contains the core layout (Navbar, Mobile Tab Bar).
-*   **`components/OrderForm.tsx`**: The heaviest component.
-    *   Handles validation logic.
-    *   Manages "Custom Item" logic vs "Menu Selection".
-    *   Handles date/time inputs.
-*   **`components/SalesReports.tsx`**:
-    *   Pure client-side calculation of KPIs.
-    *   Receives `orders` array and derives stats (Revenue, Pipeline, Top Items).
+*   **`OrderTakerApp.swift`**: The app entry point. Initializes Firebase and sets up the `StoreService` environment object.
+*   **`StoreService.swift`**: Centralized data service.
+    *   Manages authentication state.
+    *   Maintains real-time listeners for `orders` and `menuItems`.
+    *   Provides CRUD methods with optimistic updates.
+    *   Handles CSV import/export.
+*   **`Models.swift`**: Data models (`UserProfile`, `CakeOrder`, `CakeItem`, `OrderStatus` enum).
+*   **`Theme.swift`**: Centralized design system (colors, fonts, corner radii).
+*   **`UIComponents.swift`**: Reusable SwiftUI components (`PrimaryButton`, `OrderCard`, `InputField`, etc.).
+*   **Views**:
+    *   **`LoginView.swift`**: Email/Password authentication UI.
+    *   **`ContentView.swift`**: Root view controller that determines auth state.
+    *   **`MainTabView.swift`**: Tab bar navigation (Orders, Summary, Menu, Reports, Settings).
+    *   **`DashboardView.swift`**: Orders list with filtering (Today, Pending, Completed).
+    *   **`OrderFormView.swift`**: Add/Edit order form with validation.
+    *   **`MenuView.swift`**: Menu item management.
+    *   **`ReportsView.swift`**: Sales analytics dashboard.
+    *   **`SummaryView.swift`**: Daily production summary.
+    *   **`SettingsView.swift`**: App settings and CSV import/export.
+    *   **`ProfileView.swift`**: User profile display.
+*   **`MockData.swift`**: Sample data for testing.
 *   **`blueprints/`**:
-    *   `design-system.md`: UI rules (Colors, Typography).
+    *   `design-system.md`: UI/UX rules (Colors, Typography, Component patterns).
     *   `technical-architecture.md`: Data schemas and Business Logic.
-    *   `project-overview.md`: High-level goals.
+    *   `project-overview.md`: High-level goals and tech stack.
 
 ---
 
 ## 🧠 Business Logic & Rules
 
 ### Order Processing
-1.  **Validation**: An order cannot be submitted without a Name, Item, Source, Pickup Date, and Time.
-2.  **Date Handling**: Use local date strings (`YYYY-MM-DD`). Avoid UTC conversions for pickup dates to prevent "off-by-one-day" errors.
+1.  **Validation**: An order cannot be submitted without Customer Name, Item Name, Source, Pickup Date, and Pickup Time.
+2.  **Date Handling**: Use local date strings (`yyyy-MM-dd`) stored in Firestore. Avoid UTC conversions for pickup dates to prevent "off-by-one-day" errors.
 3.  **Status**: Orders are binary: `'pending'` or `'completed'`.
-4.  **Source Tracking**: Critical for the marketing report. Defaults to 'Marketplace'.
+4.  **Source Tracking**: Critical for marketing reports. Defaults to 'Marketplace'.
+5.  **Optimistic Updates**: `StoreService` applies changes locally immediately, then syncs to Firestore. Real-time listeners ensure eventual consistency.
+
+### Data Synchronization
+1.  **Real-time Listeners**: `StoreService` uses `addSnapshotListener` for orders and menu items. All SwiftUI views observe `@Published` properties and update automatically.
+2.  **Firestore Security**: User data is isolated via Firestore security rules. Only authenticated users can access their own data.
 
 ### UI/UX Standards
-1.  **Mobile First**: Ensure bottom padding (`pb-24`) exists on main containers so content isn't hidden behind the fixed mobile nav bar.
-2.  **Input Modes**: Always use `inputMode="decimal"` for prices to trigger the correct mobile keyboard.
-3.  **Feedback**: Use the existing Modal patterns for confirmations (Rose for delete, Emerald for complete).
+1.  **iOS Native Patterns**: Use `.sheet()`, `.alert()`, and `.confirmationDialog()` for modals.
+2.  **SwiftUI Bindings**: Use `@Binding`, `@State`, and `@EnvironmentObject` for state management.
+3.  **Theme Consistency**: Always reference `Theme.swift` for colors, fonts, and corner radii.
+4.  **Accessibility**: Ensure proper labels for VoiceOver support.
 
 ---
 
 ## 🔮 Future Trajectory / Known Context
-*   The app is designed to look "Premium" (Boutique Bakery style).
-*   Current focus is on "Speed of Entry" and "Visual Clarity".
+*   The app is designed to look **premium** with a boutique bakery aesthetic.
+*   Current focus is on **speed of entry** and **visual clarity** for order management.
 *   Next logical steps (if requested) might involve:
-    *   Search functionality.
-    *   Export to CSV.
-    *   Image attachments for cake designs (requires Firebase Storage).
+    *   Search functionality across orders.
+    *   Push notifications for order reminders.
+    *   Image attachments for custom cake designs (requires Firebase Storage SDK).
+    *   TestFlight distribution for beta testing.
 
 ---
 
-**Instruction to Agent**: When making changes, always check `blueprints/design-system.md` to ensure you are using the correct Tailwind utility classes (e.g., `font-black`, `text-slate-900`, `rounded-[1.5rem]`).
+**Instruction to Agent**: When making changes, always check `blueprints/design-system.md` to ensure you are using the correct SwiftUI modifiers and `Theme` constants (e.g., `Theme.primary`, `Theme.cardCornerRadius`, `Theme.headerFont`).
