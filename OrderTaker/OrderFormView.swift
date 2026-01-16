@@ -74,7 +74,7 @@ struct OrderFormView: View {
                                     .foregroundColor(Theme.Slate.s400)
                             }
                             .padding(14)
-                            .background(Theme.background)
+                            .background(Theme.inputBackground)
                             .cornerRadius(12)
                         }
                     }
@@ -86,7 +86,7 @@ struct OrderFormView: View {
                             TextField("1", text: $quantity)
                                 .keyboardType(.numberPad)
                                 .padding(14)
-                                .background(Theme.background)
+                                .background(Theme.inputBackground)
                                 .cornerRadius(12)
                                 .onChange(of: quantity) { newValue in
                                     if itemName != "Custom Cake", 
@@ -104,8 +104,8 @@ struct OrderFormView: View {
                             TextField("0.00", text: $total)
                                 .keyboardType(.decimalPad)
                                 .padding(14)
-                                .background(itemName == "Custom Cake" ? Theme.background : Theme.Slate.s400.opacity(0.1))
-                                .foregroundColor(itemName == "Custom Cake" ? Theme.Slate.s900 : Theme.Slate.s500)
+                                .background(itemName == "Custom Cake" ? Theme.inputBackground : Theme.Slate.s400.opacity(0.1))
+                                .foregroundColor(itemName == "Custom Cake" ? Theme.primaryText : Theme.Slate.s500)
                                 .cornerRadius(12)
                                 .disabled(itemName != "Custom Cake")
                         }
@@ -123,8 +123,8 @@ struct OrderFormView: View {
                                             .font(.system(size: 12, weight: .bold))
                                             .padding(.horizontal, 16)
                                             .padding(.vertical, 10)
-                                            .background(source == s ? Theme.primary : Color.white)
-                                            .foregroundColor(source == s ? .white : Theme.Slate.s600)
+                                            .background(source == s ? Theme.primary : Theme.cardBackground)
+                                            .foregroundColor(source == s ? .white : Theme.primaryText)
                                             .cornerRadius(12)
                                             .overlay(
                                                 RoundedRectangle(cornerRadius: 12)
@@ -141,35 +141,50 @@ struct OrderFormView: View {
                             Text("PICKUP DATE")
                                 .fieldLabelStyle()
                             DatePicker("", selection: $pickupDate, displayedComponents: .date)
+                                .datePickerStyle(.compact)
                                 .labelsHidden()
-                                .padding(8)
-                                .background(Theme.background)
-                                .cornerRadius(12)
+                                .tint(Theme.primary)
+                                // .padding(.horizontal, 14)
+                                // .padding(.vertical, 14)
+                                // .background(Theme.inputBackground)
+                                // .cornerRadius(12)
+                                .buttonStyle(.plain)
                         }
                         
                         VStack(alignment: .leading, spacing: 6) {
                             Text("PICKUP TIME")
                                 .fieldLabelStyle()
                             DatePicker("", selection: $pickupTime, displayedComponents: .hourAndMinute)
+                                .datePickerStyle(.compact)
                                 .labelsHidden()
-                                .padding(8)
-                                .background(Theme.background)
-                                .cornerRadius(12)
+                                .tint(Theme.primary)
+                                // .padding(.horizontal, 14)
+                                // .padding(.vertical, 14)
+                                // .background(Theme.inputBackground)
+                                // .cornerRadius(12)
+                                .buttonStyle(.plain)
                         }
                     }
                     
                     VStack(alignment: .leading, spacing: 6) {
                         Text("NOTES")
                             .fieldLabelStyle()
-                        TextEditor(text: $notes)
-                            .frame(height: 100)
-                            .padding(8)
-                            .background(Theme.background)
-                            .cornerRadius(12)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Theme.Slate.s400.opacity(0.1), lineWidth: 1)
-                            )
+                        ZStack(alignment: .topLeading) {
+                            if notes.isEmpty {
+                                Text("Add any special instructions...")
+                                    .foregroundColor(Theme.Slate.s400)
+                                    .padding(.horizontal, 4)
+                                    .padding(.vertical, 8)
+                            }
+                            TextEditor(text: $notes)
+                                .scrollContentBackground(.hidden)
+                                .frame(height: 100)
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 2)
+                        }
+                        .padding(10)
+                        .background(Theme.inputBackground)
+                        .cornerRadius(12)
                     }
                     
                     if !isFormValid && !isSubmitting {
@@ -223,7 +238,7 @@ struct OrderFormView: View {
                 .padding(.horizontal, 24)
             }
         }
-        .background(Color.white.ignoresSafeArea())
+        .background(Theme.cardBackground.ignoresSafeArea())
         .cornerRadius(Theme.modalCornerRadius, corners: [.topLeft, .topRight])
         .onAppear {
             if let order = editingOrder {

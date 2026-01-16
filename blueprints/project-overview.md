@@ -46,11 +46,13 @@ The app is currently a fully functional native iOS application with:
    - All-time statistics
 
 6. **Advanced Features**:
+   - **Full Dark Mode Support**: Adaptive color system using iOS system colors
+   - **Sort Filters**: 4 sorting options (Date Earliest/Latest, Price Low/High) with auto-switching based on tab
    - CSV Import/Export for orders and menu
    - Swipe actions for quick edits
    - Context menus for secondary actions
-   - Dark mode support (system-based)
    - Offline-first architecture with Firebase sync
+   - Real-time cross-device synchronization
 
 ## App Structure
 

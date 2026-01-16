@@ -35,6 +35,8 @@ OrderTaker is a comprehensive iOS application designed for bakery businesses to 
 - Daily production totals by item
 - Date picker for historical views
 - Real-time quantity aggregation
+- **📊 Sales Reports**: Revenue tracking, KPI dashboard, order source breakdown
+- **📤 Import/Export**: CSV-based data portability for orders and menu
 
 ### ⚙️ Advanced Features
 - CSV Import/Export for orders and menu
@@ -42,6 +44,28 @@ OrderTaker is a comprehensive iOS application designed for bakery businesses to 
 - Settings management
 - Firebase Authentication
 - Offline-first architecture
+
+## 🆕 Recent Updates (January 2026)
+
+### Dark Mode Support
+- ✅ Full adaptive color system using iOS system colors
+- ✅ All views now properly support light and dark modes
+- ✅ Settings toggle updates immediately without closing sheet
+- ✅ 10 view files updated with adaptive backgrounds and text colors
+
+### Sort Filters
+- ✅ 4 sorting options: Date (Earliest/Latest), Price (Low/High)
+- ✅ Auto-switching based on tab (Completed defaults to Latest)
+- ✅ Fixed-width button prevents text overflow
+- ✅ Menu UI with checkmarks for active selection
+
+### UI Improvements
+- ✅ Summary screen quantity badges match order card style
+- ✅ Completed tab shows most recent orders first by default
+- ✅ Refined spacing throughout the app (6pt card spacing)
+- ✅ Consistent quantity badge design (50x50pt rounded square)
+
+---
 
 ## 🚀 Getting Started
 

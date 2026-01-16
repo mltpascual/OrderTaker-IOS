@@ -155,7 +155,7 @@ struct ItemCategorySection: View {
             }
         }
         .padding(24)
-        .background(Color.white)
+        .background(Theme.cardBackground)
         .cornerRadius(24)
         .padding(.horizontal, 24)
     }
@@ -178,7 +178,7 @@ struct StatCard: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white)
+        .background(Theme.cardBackground)
         .cornerRadius(24)
         .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
     }

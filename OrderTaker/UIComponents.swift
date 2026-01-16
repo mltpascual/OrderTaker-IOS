@@ -166,7 +166,7 @@ struct OrderCard: View {
             }
         }
         .padding(12)
-        .background(Color.white)
+        .background(Theme.cardBackground)
         .cornerRadius(Theme.cardCornerRadius)
         .overlay(
             RoundedRectangle(cornerRadius: Theme.cardCornerRadius)
@@ -206,7 +206,7 @@ struct InputField: View {
                 }
             }
             .padding(14)
-            .background(Theme.background)
+            .background(Theme.inputBackground)
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)

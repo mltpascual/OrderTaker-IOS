@@ -4,6 +4,14 @@ struct DashboardView: View {
     @EnvironmentObject var store: StoreService
     @State private var selectedTab: String = "Today"
     @State private var showingSettings = false
+    @State private var sortOption: SortOption = .dateEarliest
+    
+    enum SortOption: String, CaseIterable {
+        case dateEarliest = "Date: Earliest"
+        case dateLatest = "Date: Latest"
+        case priceLow = "Price: Low to High"
+        case priceHigh = "Price: High to Low"
+    }
     
     private var todayStr: String {
         let formatter = DateFormatter()
@@ -12,22 +20,40 @@ struct DashboardView: View {
     }
     
     var filteredOrders: [CakeOrder] {
-        let sorted = store.orders.sorted { (a, b) in
-            if a.pickupDate != b.pickupDate {
-                return a.pickupDate < b.pickupDate
-            }
-            return a.pickupTime < b.pickupTime
-        }
+        var orders: [CakeOrder] = []
         
+        // First, filter based on selected tab
         switch selectedTab {
         case "Today":
-            return sorted.filter { $0.pickupDate == todayStr && $0.status == "pending" }
+            orders = store.orders.filter { $0.pickupDate == todayStr && $0.status == "pending" }
         case "Pending":
-            return sorted.filter { $0.status == "pending" }
+            orders = store.orders.filter { $0.status == "pending" }
         case "Completed":
-            return sorted.filter { $0.status == "completed" }
+            orders = store.orders.filter { $0.status == "completed" }
         default:
-            return sorted
+            orders = store.orders
+        }
+        
+        // Then, apply sorting based on selected sort option
+        switch sortOption {
+        case .dateEarliest:
+            return orders.sorted { (a, b) in
+                if a.pickupDate != b.pickupDate {
+                    return a.pickupDate < b.pickupDate
+                }
+                return a.pickupTime < b.pickupTime
+            }
+        case .dateLatest:
+            return orders.sorted { (a, b) in
+                if a.pickupDate != b.pickupDate {
+                    return a.pickupDate > b.pickupDate
+                }
+                return a.pickupTime > b.pickupTime
+            }
+        case .priceLow:
+            return orders.sorted { $0.total < $1.total }
+        case .priceHigh:
+            return orders.sorted { $0.total > $1.total }
         }
     }
     
@@ -81,7 +107,43 @@ struct DashboardView: View {
                     }
                 }
                 .padding(.horizontal, 12)
-                .padding(.bottom, 16)
+                .padding(.bottom, 8)
+                
+                // Sort Filter
+                HStack {
+                    Spacer()
+                    Menu {
+                        ForEach(SortOption.allCases, id: \.self) { option in
+                            Button(action: { sortOption = option }) {
+                                HStack {
+                                    Text(option.rawValue)
+                                    if sortOption == option {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.up.arrow.down")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(Theme.Slate.s500)
+                            Text(sortOption.rawValue)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(Theme.Slate.s600)
+                                .frame(minWidth: 110, alignment: .leading) // Fixed width prevents text overflow when switching filters
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(Theme.Slate.s400)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Theme.cardBackground)
+                        .cornerRadius(8)
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 6)
                 
                 // Order List
                 if filteredOrders.isEmpty {
@@ -159,6 +221,14 @@ struct DashboardView: View {
             }
             .background(Theme.background.ignoresSafeArea())
             .navigationBarHidden(true)
+            .onChange(of: selectedTab) { newTab in
+                // Auto-switch sort option based on selected tab
+                if newTab == "Completed" {
+                    sortOption = .dateLatest  // Latest first for completed orders
+                } else {
+                    sortOption = .dateEarliest  // Earliest first for today and pending
+                }
+            }
             .sheet(item: $orderToEdit) { order in
                 OrderFormView(editingOrder: order)
                     .environmentObject(store)
@@ -236,7 +306,7 @@ struct ProductionSummaryView: View {
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .background(Color.white)
+                    .background(Theme.cardBackground)
                     .cornerRadius(20)
                     .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
                 }

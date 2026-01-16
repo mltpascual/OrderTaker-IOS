@@ -39,7 +39,7 @@ struct ProfileView: View {
                     Divider().padding(.leading, 60)
                     ProfileMenuItem(icon: "info.circle", title: "About", action: {})
                 }
-                .background(Color.white)
+                .background(Theme.cardBackground)
                 .cornerRadius(16)
                 .padding(.horizontal, 24)
                 

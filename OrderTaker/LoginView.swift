@@ -97,7 +97,7 @@ struct SocialButton: View {
                 .foregroundColor(Theme.Slate.s900)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
-                .background(Color.white)
+                .background(Theme.cardBackground)
                 .cornerRadius(16)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)

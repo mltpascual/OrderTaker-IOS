@@ -56,7 +56,7 @@ struct SettingsView: View {
                                     .labelsHidden()
                             }
                             .padding(16)
-                            .background(Color.white)
+                            .background(Theme.cardBackground)
                             .cornerRadius(12)
                             .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
                             .padding(.horizontal, 24)
@@ -94,7 +94,7 @@ struct SettingsView: View {
                                         .font(.system(size: 14, weight: .bold))
                                 }
                                 .padding(16)
-                                .background(Color.white)
+                                .background(Theme.cardBackground)
                                 .cornerRadius(12)
                                 .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
                             }
@@ -122,7 +122,7 @@ struct SettingsView: View {
                                         .font(.system(size: 14, weight: .bold))
                                 }
                                 .padding(16)
-                                .background(Color.white)
+                                .background(Theme.cardBackground)
                                 .cornerRadius(12)
                                 .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
                             }
@@ -158,7 +158,7 @@ struct SettingsView: View {
                                         .font(.system(size: 14, weight: .bold))
                                 }
                                 .padding(16)
-                                .background(Color.white)
+                                .background(Theme.cardBackground)
                                 .cornerRadius(12)
                                 .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
                             }
@@ -186,7 +186,7 @@ struct SettingsView: View {
                                         .font(.system(size: 14, weight: .bold))
                                 }
                                 .padding(16)
-                                .background(Color.white)
+                                .background(Theme.cardBackground)
                                 .cornerRadius(12)
                                 .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
                             }
@@ -215,7 +215,7 @@ struct SettingsView: View {
                                     Spacer()
                                 }
                                 .padding(16)
-                                .background(Color.white)
+                                .background(Theme.cardBackground)
                                 .cornerRadius(12)
                                 .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
                             }
@@ -227,6 +227,7 @@ struct SettingsView: View {
             }
             .background(Theme.background.ignoresSafeArea())
             .navigationBarHidden(true)
+            .preferredColorScheme(isDarkMode ? .dark : .light) // Apply dark mode immediately
             .sheet(isPresented: $showingExportSheet) {
                 ShareSheet(items: [csvDataToExport])
             }

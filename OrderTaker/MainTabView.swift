@@ -69,7 +69,7 @@ struct MainTabView: View {
             .padding(.top, 12)
             .padding(.bottom, 34)
             .background(
-                Color.white
+                Theme.cardBackground
                     .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
             )
         }

@@ -43,13 +43,13 @@ struct SummaryView: View {
                     Spacer()
                 }
                 .padding(12)
-                .background(Color.white)
+                .background(Theme.cardBackground)
                 .cornerRadius(12)
                 .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
             }
             .padding(.horizontal, 24)
             .padding(.top, 20) // Normal top padding
-            .padding(.bottom, 20)
+            .padding(.bottom, 12)
             
             ScrollView {
                 if totals.isEmpty {
@@ -66,22 +66,29 @@ struct SummaryView: View {
                 } else {
                     VStack(spacing: 12) {
                         ForEach(totals.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
-                            HStack {
+                            HStack(spacing: 12) {
+                                // Item Name
                                 Text(key)
-                                    .font(.system(size: 16, weight: .medium))
+                                    .font(.system(size: 16, weight: .bold))
                                     .foregroundColor(Theme.Slate.s900)
                                 
                                 Spacer()
                                 
-                                Text("\(value)")
-                                    .font(.system(size: 18, weight: .bold))
-                                    .foregroundColor(Theme.primary)
-                                    .frame(width: 40, height: 40)
-                                    .background(Theme.primary.opacity(0.1))
-                                    .clipShape(Circle())
+                                // Quantity Badge (matching order card style)
+                                VStack {
+                                    Text("\(value)")
+                                        .font(.system(size: 20, weight: .black))
+                                        .foregroundColor(Theme.primary)
+                                    Text("QTY")
+                                        .font(.system(size: 8, weight: .bold))
+                                        .foregroundColor(Theme.Slate.s500)
+                                }
+                                .frame(width: 50, height: 50)
+                                .background(Theme.primary.opacity(0.1))
+                                .cornerRadius(12)
                             }
-                            .padding(16)
-                            .background(Color.white)
+                            .padding(12)
+                            .background(Theme.cardBackground)
                             .cornerRadius(12)
                             .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
                         }

@@ -71,6 +71,14 @@ This document serves as the primary context injection point for any AI agent tak
 2.  **SwiftUI Bindings**: Use `@Binding`, `@State`, and `@EnvironmentObject` for state management.
 3.  **Theme Consistency**: Always reference `Theme.swift` for colors, fonts, and corner radii.
 4.  **Accessibility**: Ensure proper labels for VoiceOver support.
+5.  **Dark Mode**: 
+    - Use adaptive colors from `Theme.swift` (e.g., `Theme.cardBackground`, `Theme.inputBackground`)
+    - Apply `.preferredColorScheme()` to views that need immediate updates when dark mode toggles
+    - Settings uses `@AppStorage("isDarkMode")` to persist user preference
+6.  **Sort Filters**:
+    - `SortOption` enum with 4 cases: `.dateEarliest`, `.dateLatest`, `.priceLow`, `.priceHigh`
+    - Auto-switching: Completed tab defaults to Latest, Today/Pending default to Earliest
+    - Use `.onChange(of: selectedTab)` to trigger auto-switching logic
 
 ---
 

@@ -8,15 +8,29 @@ To maintain uniformity, every new component must adhere to these specific stylin
 
 Defined in `Theme.swift`:
 
-- **Background**: `#FDFDFD` (Off-white) → `Theme.background`
+### Static Colors
 - **Primary**: Indigo `#4F46E5` → `Theme.primary`
 - **Success**: Emerald `#10B981` → `Theme.success`
 - **Danger**: Rose `#F43F5E` → `Theme.danger`
-- **Slate Shades**: 
-  - `Theme.Slate.s400` → `#94A3B8`
-  - `Theme.Slate.s500` → `#6B7280`
-  - `Theme.Slate.s600` → `#4B5563`
-  - `Theme.Slate.s900` → `#0F172A`
+
+### Adaptive Colors (Dark Mode Support)
+The app uses iOS system colors that automatically adapt to light/dark mode:
+
+- **Backgrounds**:
+  - `Theme.background` → `.systemGroupedBackground` (off-white in light, dark gray in dark)
+  - `Theme.cardBackground` → `.secondarySystemGroupedBackground` (white in light, elevated dark in dark)
+  - `Theme.inputBackground` → `.tertiarySystemGroupedBackground` (light gray in light, input dark in dark)
+
+- **Text Colors**:  
+  - `Theme.primaryText` → `.label` (black in light, white in dark)
+  - `Theme.secondaryText` → `.secondaryLabel` (gray in light, light gray in dark)
+  - `Theme.tertiaryText` → `.tertiaryLabel`
+
+- **Slate Shades** (now adaptive):
+  - `Theme.Slate.s400` → `.tertiaryLabel`
+  - `Theme.Slate.s500` → `.secondaryLabel`
+  - `Theme.Slate.s600` → `.secondaryLabel`
+  - `Theme.Slate.s900` → `.label`
 
 ---
 
@@ -142,10 +156,66 @@ struct ScaleButtonStyle: ButtonStyle {
 
 ---
 
+## New Components
+
+### Sort Filter Button
+Menu-style dropdown with current sort option display:
+- Icon + Text + Chevron layout
+- Fixed minWidth (110pt) to prevent text overflow
+- Background: `Theme.cardBackground`
+- Rounded corners (8pt)
+- 4 sort options: Date (Earliest/Latest), Price (Low/High)
+
+```swift
+Menu {
+    ForEach(SortOption.allCases, id: \.self) { option in
+        Button(action: { sortOption = option }) {
+            HStack {
+                Text(option.rawValue)
+                if sortOption == option {
+                    Image(systemName: "checkmark")
+                }
+            }
+        }
+    }
+} label: {
+    HStack(spacing: 6) {
+        Image(systemName: "arrow.up.arrow.down")
+        Text(sortOption.rawValue)
+            .frame(minWidth: 110, alignment: .leading)
+        Image(systemName: "chevron.down")
+    }
+}
+```
+
+### Quantity Badge
+Used in order cards and summary items:
+- 50x50pt rounded square
+- Large number (20pt, black weight, primary color)
+- "QTY" label below (8pt, bold, slate)
+- Background: `Theme.primary.opacity(0.1)`
+- Corner radius: 12pt
+
+```swift
+VStack {
+    Text("\(quantity)")
+        .font(.system(size: 20, weight: .black))
+        .foregroundColor(Theme.primary)
+    Text("QTY")
+        .font(.system(size: 8, weight: .bold))
+        .foregroundColor(Theme.Slate.s500)
+}
+.frame(width: 50, height: 50)
+.background(Theme.primary.opacity(0.1))
+.cornerRadius(12)
+```
+
+---
+
 ## Spacing & Layout
 
 - **Default Padding**: 16pt
-- **Card Spacing**: 8-12pt vertical spacing between cards
+- **Card Spacing**: 6pt vertical (top/bottom) between cards = 12pt total gap
 - **Form Fields**: 6-8pt spacing between label and input
 - **Button Groups**: 12pt spacing between buttons
 - **Safe Area**: Always respect `.safeAreaInset` for tab bars and navigation bars
