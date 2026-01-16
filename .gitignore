@@ -26,3 +26,6 @@ DerivedData
 *.DS_Store
 .gemini/
 .antigravity/
+
+# Firebase
+GoogleService-Info.plist
