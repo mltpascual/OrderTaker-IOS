@@ -57,6 +57,24 @@ struct OrderCard: View {
         return outputFormatter.string(from: date)
     }
     
+    // Source color mapping
+    private func sourceColor(for source: String) -> Color {
+        let lowercased = source.lowercased()
+        if lowercased.contains("marketplace") {
+            return Color(red: 139/255, green: 92/255, blue: 246/255) // Purple
+        } else if lowercased.contains("instagram") || lowercased.contains("ig") {
+            return Color(red: 236/255, green: 72/255, blue: 153/255) // Pink
+        } else if lowercased.contains("facebook") || lowercased.contains("fb") {
+            return Color(red: 59/255, green: 130/255, blue: 246/255) // Blue
+        } else if lowercased.contains("paula") {
+            return Color(red: 251/255, green: 146/255, blue: 60/255) // Orange
+        } else if lowercased.contains("whatsapp") {
+            return Color(red: 34/255, green: 197/255, blue: 94/255) // Green
+        } else {
+            return Theme.Slate.s500 // Default gray
+        }
+    }
+    
     var body: some View {
         HStack(spacing: 12) {
             // Visual Anchor: Quantity Badge
@@ -81,6 +99,15 @@ struct OrderCard: View {
                 Text(order.itemName)
                     .font(.system(size: 14))
                     .foregroundColor(Theme.Slate.s600)
+                
+                // Source Badge
+                Text(order.source)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(sourceColor(for: order.source))
+                    .cornerRadius(6)
                 
                 HStack(spacing: 4) {
                     Text("$\(String(format: "%.2f", order.total))")
