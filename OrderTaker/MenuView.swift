@@ -84,8 +84,10 @@ struct MenuView: View {
             .sheet(isPresented: $showingAddSheet) {
                 MenuFormView(store: store, itemToEdit: nil)
             }
-            .sheet(item: $editingItem) { item in
-                MenuFormView(store: store, itemToEdit: item)
+            .sheet(item: $editingItem) { staleItem in
+                // Look up the fresh item from store to get latest category value
+                let freshItem = store.menuItems.first { $0.id == staleItem.id } ?? staleItem
+                MenuFormView(store: store, itemToEdit: freshItem)
             }
             .alert(isPresented: $showingDeleteAlert) {
                 Alert(
@@ -108,8 +110,18 @@ struct MenuFormView: View {
     @ObservedObject var store: StoreService
     let itemToEdit: CakeItem?
     
-    @State private var name: String = ""
-    @State private var price: String = ""
+    @State private var name: String
+    @State private var price: String
+    @State private var category: String
+    
+    init(store: StoreService, itemToEdit: CakeItem?) {
+        self.store = store
+        self.itemToEdit = itemToEdit
+        // Initialize state from item
+        _name = State(initialValue: itemToEdit?.name ?? "")
+        _price = State(initialValue: itemToEdit != nil ? String(format: "%.2f", itemToEdit!.basePrice) : "")
+        _category = State(initialValue: itemToEdit?.category ?? "Other")
+    }
     
     var body: some View {
         NavigationView {
@@ -118,6 +130,20 @@ struct MenuFormView: View {
                     InputField(label: "Item Name", text: $name, placeholder: "e.g. Chocolate Cake")
                     InputField(label: "Base Price", text: $price, placeholder: "0.00")
                         .keyboardType(.decimalPad)
+                    
+                    // Category Picker
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("CATEGORY")
+                            .font(Theme.labelFont)
+                            .foregroundColor(Theme.Slate.s500)
+                        
+                        Picker("Category", selection: $category) {
+                            Text("Cake").tag("Cake")
+                            Text("Dessert").tag("Dessert")
+                            Text("Other").tag("Other")
+                        }
+                        .pickerStyle(.segmented)
+                    }
                 }
                 
                 PrimaryButton(title: itemToEdit == nil ? "Save Item" : "Update Item", action: {
@@ -125,13 +151,11 @@ struct MenuFormView: View {
                     
                     if let existingItem = itemToEdit {
                         // Update
-                        var updatedItem = existingItem
-                        // Create a new struct with updated values (since properties are let)
-                        updatedItem = CakeItem(id: existingItem.id, name: name, basePrice: priceValue)
+                        let updatedItem = CakeItem(id: existingItem.id, name: name, basePrice: priceValue, category: category)
                         store.updateMenuItem(updatedItem)
                     } else {
                         // Create
-                        let newItem = CakeItem(name: name, basePrice: priceValue)
+                        let newItem = CakeItem(name: name, basePrice: priceValue, category: category)
                         store.addMenuItem(newItem)
                     }
                     
@@ -146,12 +170,7 @@ struct MenuFormView: View {
                 presentationMode.wrappedValue.dismiss()
             })
         }
-        .onAppear {
-            if let item = itemToEdit {
-                name = item.name
-                price = String(format: "%.2f", item.basePrice)
-            }
-        }
+        .id(itemToEdit?.id ?? UUID().uuidString)
     }
 }
 

@@ -48,6 +48,8 @@ The app is currently a fully functional native iOS application with:
 6. **Advanced Features**:
    - **Full Dark Mode Support**: Adaptive color system using iOS system colors
    - **Sort Filters**: 4 sorting options (Date Earliest/Latest, Price Low/High) with auto-switching based on tab
+   - **Global Search**: Search across all orders by customer name, item name, or notes
+   - **Menu Categories**: Categorize menu items (Cake/Dessert/Other) for automated sales report grouping
    - CSV Import/Export for orders and menu
    - Swipe actions for quick edits
    - Context menus for secondary actions

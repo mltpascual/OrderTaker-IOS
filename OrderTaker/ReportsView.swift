@@ -20,7 +20,6 @@ struct ReportsView: View {
     let dessertItems = [
         "Brownies (8x8\")",
         "Butterscotch Brownies (8x8\")",
-        "Butterscoth Brownies (8x8\")", // Typo variant
         "Leche Flan",
         "Cheese Rolls",
         "Crinkles",
@@ -48,12 +47,27 @@ struct ReportsView: View {
         var other: [(String, Int)] = []
         
         for (itemName, count) in itemCounts {
-            if cakeItems.contains(itemName) {
-                cakes.append((itemName, count))
-            } else if dessertItems.contains(itemName) {
-                desserts.append((itemName, count))
+            // Look up the menu item to check if it has a category
+            let menuItem = store.menuItems.first { $0.name == itemName }
+            
+            if let category = menuItem?.category {
+                // Use menu item's category field
+                if category == "Cake" {
+                    cakes.append((itemName, count))
+                } else if category == "Dessert" {
+                    desserts.append((itemName, count))
+                } else {
+                    other.append((itemName, count))
+                }
             } else {
-                other.append((itemName, count))
+                // Fallback to hardcoded arrays for existing items without category
+                if cakeItems.contains(itemName) {
+                    cakes.append((itemName, count))
+                } else if dessertItems.contains(itemName) {
+                    desserts.append((itemName, count))
+                } else {
+                    other.append((itemName, count))
+                }
             }
         }
         
@@ -72,7 +86,7 @@ struct ReportsView: View {
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 32) {
+            VStack(alignment: .leading, spacing: 20) {
                 Text("Sales Report")
                     .font(Theme.headerFont)
                     .foregroundColor(Theme.Slate.s900)
@@ -80,7 +94,7 @@ struct ReportsView: View {
                     .padding(.top, 20)
                 
                 // KPIs Grid
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                     StatCard(title: "TOTAL REVENUE", value: "$\(String(format: "%.0f", stats.revenue))", color: Theme.success)
                     StatCard(title: "PIPELINE", value: "$\(String(format: "%.0f", stats.pipeline))", color: Theme.primary)
                     StatCard(title: "TOTAL ORDERS", value: "\(stats.totalOrders)", color: Theme.Slate.s900)

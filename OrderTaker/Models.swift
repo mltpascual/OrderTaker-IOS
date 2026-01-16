@@ -24,10 +24,15 @@ struct CakeOrder: Codable, Identifiable {
     var status: String // 'pending' | 'completed'
 }
 
-struct CakeItem: Codable, Identifiable {
+struct CakeItem: Codable, Identifiable, Equatable {
     @DocumentID var id: String?
     let name: String
     let basePrice: Double
+    var category: String? // "Cake", "Dessert", or "Other" - nil for existing items (uses fallback)
+    
+    static func == (lhs: CakeItem, rhs: CakeItem) -> Bool {
+        lhs.id == rhs.id && lhs.name == rhs.name && lhs.basePrice == rhs.basePrice && lhs.category == rhs.category
+    }
 }
 
 enum OrderStatus: String {

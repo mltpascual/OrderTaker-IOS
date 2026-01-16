@@ -210,6 +210,62 @@ VStack {
 .cornerRadius(12)
 ```
 
+### Search Bar
+Global search input in DashboardView:
+- Appears when magnifying glass icon is tapped
+- Magnifying glass icon (left) + TextField + Clear button (right)
+- Background: `Theme.inputBackground`
+- Corner radius: 12pt
+- Padding: 14pt horizontal, 12pt vertical
+- Placeholder: "Search customer, item, or notes..."
+
+```swift
+HStack(spacing: 8) {
+    Image(systemName: "magnifyingglass")
+        .font(.system(size: 14))
+        .foregroundColor(Theme.Slate.s400)
+    
+    TextField("Search customer, item, or notes...", text: $searchText)
+        .font(.system(size: 14))
+        .autocapitalization(.none)
+        .disableAutocorrection(true)
+    
+    if !searchText.isEmpty {
+        Button(action: { searchText = "" }) {
+            Image(systemName: "xmark.circle.fill")
+                .font(.system(size: 14))
+                .foregroundColor(Theme.Slate.s400)
+        }
+    }
+}
+.padding(.horizontal, 14)
+.padding(.vertical, 12)
+.background(Theme.inputBackground)
+.cornerRadius(12)
+```
+
+### Category Picker
+Segmented picker in MenuView for categorizing items:
+- 3 options: Cake | Dessert | Other
+- Uses native iOS `.segmented` picker style
+- Label: "CATEGORY" (Theme.labelFont)
+- Spacing: 8pt between label and picker
+
+```swift
+VStack(alignment: .leading, spacing: 8) {
+    Text("CATEGORY")
+        .font(Theme.labelFont)
+        .foregroundColor(Theme.Slate.s500)
+    
+    Picker("Category", selection: $category) {
+        Text("Cake").tag("Cake")
+        Text("Dessert").tag("Dessert")
+        Text("Other").tag("Other")
+    }
+    .pickerStyle(.segmented)
+}
+```
+
 ---
 
 ## Spacing & Layout

@@ -79,6 +79,15 @@ This document serves as the primary context injection point for any AI agent tak
     - `SortOption` enum with 4 cases: `.dateEarliest`, `.dateLatest`, `.priceLow`, `.priceHigh`
     - Auto-switching: Completed tab defaults to Latest, Today/Pending default to Earliest
     - Use `.onChange(of: selectedTab)` to trigger auto-switching logic
+7.  **Global Search**:
+    - Search bar appears in DashboardView header when search icon is tapped
+    - Searches across ALL orders (Today, Pending, Completed) by customer name, item name, or notes
+    - Uses `localizedCaseInsensitiveContains()` for substring matching
+    - Order count shows "(filtered)" indicator when search is active
+8.  **Menu Categories**:
+    - CakeItem model has optional `category` field ("Cake", "Dessert", "Other")
+    - MenuView forms include segmented picker for category selection
+    - ReportsView uses smart categorization: checks menu category first, falls back to hardcoded arrays for backward compatibility
 
 ---
 
@@ -86,7 +95,6 @@ This document serves as the primary context injection point for any AI agent tak
 *   The app is designed to look **premium** with a boutique bakery aesthetic.
 *   Current focus is on **speed of entry** and **visual clarity** for order management.
 *   Next logical steps (if requested) might involve:
-    *   Search functionality across orders.
     *   Push notifications for order reminders.
     *   Image attachments for custom cake designs (requires Firebase Storage SDK).
     *   TestFlight distribution for beta testing.

@@ -5,6 +5,8 @@ struct DashboardView: View {
     @State private var selectedTab: String = "Today"
     @State private var showingSettings = false
     @State private var sortOption: SortOption = .dateEarliest
+    @State private var searchText: String = ""
+    @State private var isSearching: Bool = false
     
     enum SortOption: String, CaseIterable {
         case dateEarliest = "Date: Earliest"
@@ -20,21 +22,32 @@ struct DashboardView: View {
     }
     
     var filteredOrders: [CakeOrder] {
-        var orders: [CakeOrder] = []
+        var orders: [CakeOrder] = store.orders
         
-        // First, filter based on selected tab
-        switch selectedTab {
-        case "Today":
-            orders = store.orders.filter { $0.pickupDate == todayStr && $0.status == "pending" }
-        case "Pending":
-            orders = store.orders.filter { $0.status == "pending" }
-        case "Completed":
-            orders = store.orders.filter { $0.status == "completed" }
-        default:
-            orders = store.orders
+        // Step 1: Apply search filter (searches ALL orders)
+        if !searchText.isEmpty {
+            orders = orders.filter { order in
+                order.customerName.localizedCaseInsensitiveContains(searchText) ||
+                order.itemName.localizedCaseInsensitiveContains(searchText) ||
+                order.notes.localizedCaseInsensitiveContains(searchText)
+            }
         }
         
-        // Then, apply sorting based on selected sort option
+        // Step 2: Filter based on selected tab (only if NOT searching)
+        if searchText.isEmpty {
+            switch selectedTab {
+            case "Today":
+                orders = orders.filter { $0.pickupDate == todayStr && $0.status == "pending" }
+            case "Pending":
+                orders = orders.filter { $0.status == "pending" }
+            case "Completed":
+                orders = orders.filter { $0.status == "completed" }
+            default:
+                break
+            }
+        }
+        
+        // Step 3: Apply sorting based on selected sort option
         switch sortOption {
         case .dateEarliest:
             return orders.sorted { (a, b) in
@@ -71,13 +84,23 @@ struct DashboardView: View {
                             .font(Theme.headerFont)
                             .foregroundColor(Theme.Slate.s900)
                         
-                        Text("\(filteredOrders.count) ORDERS")
+                        Text("\(filteredOrders.count) ORDERS\(searchText.isEmpty ? "" : " (filtered)")")
                             .font(Theme.labelFont)
                             .foregroundColor(Theme.Slate.s500)
                     }
                     Spacer()
                     
                     HStack(spacing: 16) {
+                        Button(action: { 
+                            isSearching.toggle()
+                            if !isSearching {
+                                searchText = "" // Clear search when closing
+                            }
+                        }) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(isSearching || !searchText.isEmpty ? Theme.primary : Theme.Slate.s400)
+                        }
+                        
                         Button(action: { showingSettings = true }) {
                             Image(systemName: "gearshape.fill")
                                 .foregroundColor(Theme.Slate.s400)
@@ -108,6 +131,34 @@ struct DashboardView: View {
                 }
                 .padding(.horizontal, 12)
                 .padding(.bottom, 8)
+                
+                // Search Bar
+                if isSearching || !searchText.isEmpty {
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 14))
+                            .foregroundColor(Theme.Slate.s400)
+                        
+                        TextField("Search customer, item, or notes...", text: $searchText)
+                            .font(.system(size: 14))
+                            .autocapitalization(.none)
+                            .disableAutocorrection(true)
+                        
+                        if !searchText.isEmpty {
+                            Button(action: { searchText = "" }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(Theme.Slate.s400)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+                    .background(Theme.inputBackground)
+                    .cornerRadius(12)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 8)
+                }
                 
                 // Sort Filter
                 HStack {
