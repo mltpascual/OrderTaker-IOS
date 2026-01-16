@@ -88,12 +88,25 @@ OrderTaker is a comprehensive iOS application designed for bakery businesses to 
 ## 📱 Screenshots
 
 <p align="center">
+  <img src=".github/assets/screenshot_login.png" width="200" alt="Login Screen" />
   <img src=".github/assets/screenshot_orders.png" width="200" alt="Orders Queue" />
   <img src=".github/assets/screenshot_summary.png" width="200" alt="Production Summary" />
   <img src=".github/assets/screenshot_sales.png" width="200" alt="Sales Report" />
   <img src=".github/assets/screenshot_menu.png" width="200" alt="Menu Management" />
   <img src=".github/assets/screenshot_new_order.png" width="200" alt="New Order Form" />
 </p>
+
+## 📚 Documentation
+
+This project includes comprehensive blueprint documentation in the `blueprints/` directory. These files have been **updated to reflect the current Swift iOS architecture** (migrated from the original PWA implementation):
+
+- **[ai-handover.md](blueprints/ai-handover.md)** - AI agent context and handover protocol
+- **[design-system.md](blueprints/design-system.md)** - SwiftUI Theme system and UI/UX guidelines
+- **[project-overview.md](blueprints/project-overview.md)** - Tech stack and project goals
+- **[technical-architecture.md](blueprints/technical-architecture.md)** - Data models and business logic
+
+> [!NOTE]
+> All documentation has been updated as of January 2026 to accurately reflect the native iOS implementation using Swift, SwiftUI, and Firebase.
 
 ## 🏗️ Architecture
 
@@ -115,7 +128,7 @@ OrderTaker/
 ├── Theme/
 │   ├── Theme.swift           # App colors & fonts
 │   └── UIComponents.swift    # Reusable components
-└── blueprints/               # Design docs
+└── blueprints/               # Design docs (updated)
 ```
 
 ## 🎨 Design System
