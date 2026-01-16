@@ -92,22 +92,25 @@ struct OrderCard: View {
             
             // Middle Content: Info & Details
             VStack(alignment: .leading, spacing: 4) {
-                Text(order.customerName)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(Theme.Slate.s900)
+                // Customer Name + Source Badge
+                HStack(spacing: 6) {
+                    Text(order.customerName)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(Theme.Slate.s900)
+                    
+                    // Source Badge
+                    Text(order.source)
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(sourceColor(for: order.source))
+                        .cornerRadius(6)
+                }
                 
                 Text(order.itemName)
                     .font(.system(size: 14))
                     .foregroundColor(Theme.Slate.s600)
-                
-                // Source Badge
-                Text(order.source)
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(sourceColor(for: order.source))
-                    .cornerRadius(6)
                 
                 HStack(spacing: 4) {
                     Text("$\(String(format: "%.2f", order.total))")
