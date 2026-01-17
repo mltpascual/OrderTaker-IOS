@@ -8,6 +8,9 @@ struct SettingsView: View {
     
     @State private var showingExportSheet = false
     @State private var showingImportPicker = false
+    @State private var showingResultAlert = false
+    @State private var resultMessage = ""
+    @State private var resultTitle = ""
     @State private var csvDataToExport: String = ""
     @State private var importType: ImportType = .orders
     
@@ -27,8 +30,8 @@ struct SettingsView: View {
                     Spacer()
                     Button(action: { presentationMode.wrappedValue.dismiss() }) {
                         Image(systemName: "xmark.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(Theme.Slate.s400)
+                        .font(.title2)
+                        .foregroundColor(Theme.Slate.s400)
                     }
                 }
                 .padding(24)
@@ -233,14 +236,62 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showingImportPicker) {
                 DocumentPicker { url in
-                    if let csvString = try? String(contentsOf: url, encoding: .utf8) {
+                    // Security: Access the file safely
+                    let gettingAccess = url.startAccessingSecurityScopedResource()
+                    defer {
+                        if gettingAccess { url.stopAccessingSecurityScopedResource() }
+                    }
+                    
+                    // Try validation strategies
+                    var fileContent: String? = nil
+                    
+                    // Strategy 1: UTF-8
+                    if let content = try? String(contentsOf: url, encoding: .utf8) {
+                        fileContent = content
+                    } 
+                    // Strategy 2: ASCII
+                    else if let content = try? String(contentsOf: url, encoding: .ascii) {
+                         fileContent = content
+                    }
+                    // Strategy 3: MacOS Roman (Common legacy)
+                    else if let content = try? String(contentsOf: url, encoding: .macOSRoman) {
+                         fileContent = content
+                    }
+                    // Strategy 4: Windows Latin1 (Excel default)
+                    else if let content = try? String(contentsOf: url, encoding: .windowsCP1252) {
+                         fileContent = content
+                    }
+                    
+                    if let csvString = fileContent {
+                        var result: (imported: Int, errors: Int) = (0, 0)
+                        
                         if importType == .orders {
-                            store.importOrdersFromCSV(csvString)
+                            result = store.importOrdersFromCSV(csvString)
+                            resultTitle = "Import Orders Result"
                         } else {
-                            store.importMenuFromCSV(csvString)
+                            result = store.importMenuFromCSV(csvString)
+                            resultTitle = "Import Menu Result"
                         }
+                        
+                        if result.imported == 0 && result.errors == 0 {
+                            resultMessage = "No items found in file. Check format."
+                        } else {
+                            resultMessage = "Successfully imported: \(result.imported)\nFailed rows: \(result.errors)\n\(result.errors > 0 ? "Check console for details." : "")"
+                        }
+                        showingResultAlert = true
+                    } else {
+                        resultTitle = "File Read Error"
+                        resultMessage = "Could not read the file encoding. Please ensure it is a valid CSV or Text file (UTF-8 preferred)."
+                        showingResultAlert = true
                     }
                 }
+            }
+            .alert(isPresented: $showingResultAlert) {
+                Alert(
+                    title: Text(resultTitle),
+                    message: Text(resultMessage),
+                    dismissButton: .default(Text("OK"))
+                )
             }
         }
     }
