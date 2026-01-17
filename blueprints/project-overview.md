@@ -13,11 +13,19 @@ OrderTaker is a high-end, professional Order Management System (OMS) designed sp
 - **Design System**: Custom `Theme.swift` with SF Pro fonts and SF Symbols iconography
 - **Architecture**: MVVM with `StoreService` as the data layer (`ObservableObject`)
 
+## Project Dependencies (SPM)
+| Package | Repository URL | Purpose |
+| :--- | :--- | :--- |
+| **Firebase iOS SDK** | `github.com/firebase/firebase-ios-sdk` | Auth, Firestore, Analytics |
+| **Google Sign-In** | `github.com/google/GoogleSignIn-iOS` | Google Authentication integration |
+
 ## Current State
 The app is currently a fully functional native iOS application with:
 
 1. **Authentication**: 
    - Email/Password login and registration
+   - **Google Sign-In** integration
+   - **Email Verification** flow for new users ("Parking" screen enforcement)
    - Automatic User Profile creation in Firestore
    - Persistent session management via Firebase Auth
 

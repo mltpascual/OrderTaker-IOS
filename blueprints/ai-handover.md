@@ -13,7 +13,7 @@ This document serves as the primary context injection point for any AI agent tak
 *   **Build System**: Xcode project (`.xcodeproj`) with support for iOS 17.0+.
 
 ### 2. Backend Strategy (Firebase)
-*   **Auth**: Email/Password authentication via Firebase Auth iOS SDK.
+*   **Auth**: Email/Password and **Google Sign-In** authentication via Firebase Auth iOS SDK.
 *   **Database**: Cloud Firestore with real-time listeners.
 *   **Data Isolation**: All data is scoped to the user via Firestore security rules.
     *   `users/{uid}/orders/{orderId}`
@@ -36,6 +36,7 @@ This document serves as the primary context injection point for any AI agent tak
 *   **`UIComponents.swift`**: Reusable SwiftUI components (`PrimaryButton`, `OrderCard`, `InputField`, etc.).
 *   **Views**:
     *   **`LoginView.swift`**: Email/Password authentication UI.
+    *   **`EmailVerificationView.swift`**: "Parking" screen for unverified email accounts.
     *   **`ContentView.swift`**: Root view controller that determines auth state.
     *   **`MainTabView.swift`**: Tab bar navigation (Orders, Summary, Menu, Reports, Settings).
     *   **`DashboardView.swift`**: Orders list with filtering (Today, Pending, Completed).
@@ -50,6 +51,7 @@ This document serves as the primary context injection point for any AI agent tak
     *   `design-system.md`: UI/UX rules (Colors, Typography, Component patterns).
     *   `technical-architecture.md`: Data schemas and Business Logic.
     *   `project-overview.md`: High-level goals and tech stack.
+    *   `firebase-config.md`: Backend security rules, composite indexes, and auth provider setup.
 
 ---
 

@@ -68,46 +68,55 @@ OrderTaker is a comprehensive iOS application designed for bakery businesses to 
 ---
 
 ## 🚀 Getting Started
+=======
 
-### Prerequisites
+### 1. Prerequisites
 
-- Xcode 15.0+
-- iOS 17.0+
-- Firebase account
-- CocoaPods or Swift Package Manager
+*   **Mac Setup**: macOS Sonoma or newer.
+*   **Xcode**: Version 15.0+ (Available on the Mac App Store).
+*   **Git**: Pre-installed on macOS, or install via Homebrew.
+*   **Firebase Account**: Required for backend services.
 
-### Installation
+### 2. Clone the Repository
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/mltpascual/OrderTaker-IOS.git
-   cd OrderTaker-IOS
-   ```
+Open your Terminal and run the following commands to download the project code:
 
-2. **Install dependencies**
-   ```bash
-   # If using CocoaPods
-   pod install
-   
-   # If using SPM, dependencies are in Xcode project
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/mltpascual/OrderTaker-IOS.git
 
-3. **Firebase Setup**
-   - Create a Firebase project at [firebase.google.com](https://firebase.google.com)
-   - Download `GoogleService-Info.plist`
-   - Add to Xcode project root
-   - Enable Firestore and Authentication
+# Navigate to the project directory
+cd OrderTaker-IOS
+```
 
-4. **Open in Xcode**
-   ```bash
-   open OrderTaker.xcodeproj
-   # or
-   open OrderTaker.xcworkspace  # if using CocoaPods
-   ```
+### 3. Firebase Configuration (Crucial Step)
 
-5. **Run the app**
-   - Select a simulator or device
-   - Press `⌘R` to build and run
+The project requires a sensitive configuration file (`GoogleService-Info.plist`) which is **not included in the repository** for security reasons.
+
+1.  Go to the [Firebase Console](https://console.firebase.google.com/).
+2.  Open your project (or create a new one).
+3.  In "Project Settings", select the iOS app.
+4.  Download **`GoogleService-Info.plist`**.
+5.  Drag and drop this file into the root `OrderTaker/` folder in Finder.
+6.  **Important**: When adding to Xcode later, ensure it is checked for the "OrderTaker" target.
+
+### 4. Open Project & Install Dependencies
+
+This project uses **Swift Package Manager (SPM)**, which is built directly into Xcode. It will automatically download dependencies (Firebase, Google Sign-In) when you open the project.
+
+1.  **Open the Project**:
+    Double-click `OrderTaker.xcodeproj` in the project folder.
+
+2.  **Wait for Package Resolution**:
+    Look at the bottom-right status bar in Xcode. You will see "Resolving Packages...". Wait for this to finish. 
+    *   *If packages fail to resolve, go to `File > Packages > Reset Package Caches`.*
+
+### 5. Build and Run
+
+1.  Select a **Simulator** (e.g., iPhone 15 Pro) from the top device selector.
+2.  Press **Cmd + R** (or click the Play button) to build and run.
+3.  The simulator should launch and display the Login screen.
+    *   *Note: Google Sign-In requires the correct URL Scheme to be configured in `Info.plist` if you created a fresh project.*
 
 ## 📱 Screenshots
 

@@ -71,6 +71,8 @@ The `StoreService` class is an `ObservableObject` that manages all data operatio
    - `signIn()` - Sets up auth state listener and fetches data
    - `emailSignIn(email:password:completion:)` - Email/password login
    - `emailSignUp(email:password:fullName:completion:)` - New user registration
+   - `googleSignIn(completion:)` - Google Sign-In flow
+   - `sendPasswordReset(email:completion:)` - Sends password reset email
    - `signOut()` - Removes listeners and signs out
 
 2. **Orders CRUD**
@@ -155,6 +157,13 @@ All calculations are derived client-side from the `orders` array in `ReportsView
 ### 11. Environment Configuration
 *   Firebase configuration is loaded from `GoogleService-Info.plist`.
 *   No environment variables are used; all config is handled by Firebase SDK.
+*   **Google Sign-In**: Requires custom URL scheme in `Info.plist` (Editor role, `com.google.gid` identifier).
+
+### 12. Email Verification Logic
+*   **Parking Screen**: Unverified users (except those signed in via Google) are redirected to `EmailVerificationView` via `ContentView` logic.
+*   **Verification Check**: Checks `auth.currentUser.isEmailVerified` on app launch and login.
+*   **Sign Up Flow**: New email sign-ups are automatically sent a verification link and kept in the "parking" state until verified.
+*   **Resend**: Users can request a new verification email from the parking screen.
 
 ---
 

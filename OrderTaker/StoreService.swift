@@ -2,6 +2,8 @@ import Foundation
 import Combine
 import FirebaseFirestore
 import FirebaseAuth
+import GoogleSignIn
+import UIKit
 
 class StoreService: ObservableObject {
     @Published var orders: [CakeOrder] = []
@@ -59,20 +61,148 @@ class StoreService: ObservableObject {
     }
     
     func emailSignIn(email: String, password: String, completion: @escaping (Error?) -> Void) {
-        auth.signIn(withEmail: email, password: password) { _, error in
-            completion(error)
+        auth.signIn(withEmail: email, password: password) { authResult, error in
+            if let error = error {
+                completion(error)
+                return
+            }
+            
+            // Check if email is verified
+            guard let user = authResult?.user else {
+                completion(error)
+                return
+            }
+            
+            if !user.isEmailVerified {
+                // Don't sign out - keep them logged in but show verification screen
+                let verificationError = NSError(
+                    domain: "EmailVerificationError",
+                    code: 1001,
+                    userInfo: [NSLocalizedDescriptionKey: "Please verify your email address before continuing."]
+                )
+                completion(verificationError)
+            } else {
+                completion(nil)
+            }
         }
     }
     
     func emailSignUp(email: String, password: String, fullName: String, completion: @escaping (Error?) -> Void) {
         auth.createUser(withEmail: email, password: password) { result, error in
-            if let uid = result?.user.uid {
-                let profile = UserProfile(id: uid, fullName: fullName, email: email, createdAt: ISO8601DateFormatter().string(from: Date()), role: "user")
-                try? self.db.collection("users").document(uid).setData(from: profile)
+            if let error = error {
+                completion(error)
+                return
             }
+            
+            guard let user = result?.user else {
+                completion(error)
+                return
+            }
+            
+            // Create user profile in Firestore
+            let uid = user.uid
+            let profile = UserProfile(id: uid, fullName: fullName, email: email, createdAt: ISO8601DateFormatter().string(from: Date()), role: "user")
+            try? self.db.collection("users").document(uid).setData(from: profile)
+            
+            // Send email verification
+            user.sendEmailVerification { verificationError in
+                if let verificationError = verificationError {
+                    completion(verificationError)
+                } else {
+                    // Don't sign out - keep user logged in but show verification screen
+                    // Return custom error to indicate verification needed
+                    let verificationNeeded = NSError(
+                        domain: "EmailVerificationNeeded",
+                        code: 2001,
+                        userInfo: [NSLocalizedDescriptionKey: "Verification email sent! Please check your inbox."]
+                    )
+                    completion(verificationNeeded)
+                }
+            }
+        }
+    }
+    
+    func sendPasswordReset(email: String, completion: @escaping (Error?) -> Void) {
+        auth.sendPasswordReset(withEmail: email) { error in
             completion(error)
         }
     }
+    
+    
+    // MARK: - Google Sign-In
+    func googleSignIn(completion: @escaping (Error?) -> Void) {
+        // Get the root view controller to present Google Sign-In
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootViewController = windowScene.windows.first?.rootViewController else {
+            let error = NSError(
+                domain: "GoogleSignInError",
+                code: 5001,
+                userInfo: [NSLocalizedDescriptionKey: "Unable to present sign-in screen."]
+            )
+            completion(error)
+            return
+        }
+        
+        // Configure Google Sign-In
+        guard let clientID = auth.app?.options.clientID else {
+            let error = NSError(
+                domain: "GoogleSignInError",
+                code: 5002,
+                userInfo: [NSLocalizedDescriptionKey: "Google Sign-In configuration error."]
+            )
+            completion(error)
+            return
+        }
+        
+        let config = GIDConfiguration(clientID: clientID)
+        GIDSignIn.sharedInstance.configuration = config
+        
+        // Start Google Sign-In flow
+        GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { result, error in
+            if let error = error {
+                completion(error)
+                return
+            }
+            
+            guard let user = result?.user,
+                  let idToken = user.idToken?.tokenString else {
+                let error = NSError(
+                    domain: "GoogleSignInError",
+                    code: 5003,
+                    userInfo: [NSLocalizedDescriptionKey: "Failed to get user credentials."]
+                )
+                completion(error)
+                return
+            }
+            
+            let accessToken = user.accessToken.tokenString
+            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
+            
+            // Sign in to Firebase with Google credential
+            self.auth.signIn(with: credential) { authResult, error in
+                if let error = error {
+                    completion(error)
+                    return
+                }
+                
+                // Check if this is a new user and create profile
+                if let firebaseUser = authResult?.user, authResult?.additionalUserInfo?.isNewUser == true {
+                    let profile = UserProfile(
+                        id: firebaseUser.uid,
+                        fullName: firebaseUser.displayName ?? "User",
+                        email: firebaseUser.email ?? "",
+                        createdAt: ISO8601DateFormatter().string(from: Date()),
+                        role: "user"
+                    )
+                    try? self.db.collection("users").document(firebaseUser.uid).setData(from: profile)
+                }
+                
+                completion(nil)
+            }
+        }
+    }
+
+
     
     func signOut() {
         ordersListener?.remove()

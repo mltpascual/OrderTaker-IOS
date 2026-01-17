@@ -39,7 +39,7 @@ struct DashboardView: View {
             case "Today":
                 orders = orders.filter { $0.pickupDate == todayStr && $0.status == "pending" }
             case "Pending":
-                orders = orders.filter { $0.status == "pending" }
+                orders = orders.filter { $0.status == "pending" && $0.pickupDate != todayStr }
             case "Completed":
                 orders = orders.filter { $0.status == "completed" }
             default:
@@ -73,6 +73,8 @@ struct DashboardView: View {
     @State private var orderToEdit: CakeOrder? = nil
     @State private var orderToDelete: CakeOrder? = nil
     @State private var showingDeleteAlert: Bool = false
+    @State private var orderToComplete: CakeOrder? = nil
+    @State private var showingCompleteAlert: Bool = false
     
     var body: some View {
         NavigationView {
@@ -225,8 +227,15 @@ struct DashboardView: View {
                                     showingDeleteAlert = true
                                 },
                                 onStatusChange: { newStatus in
-                                    if let id = order.id {
-                                        store.updateOrderStatus(orderId: id, status: newStatus)
+                                    // Show confirmation for completing orders in Today and Pending tabs
+                                    if newStatus == "completed" && (selectedTab == "Today" || selectedTab == "Pending") {
+                                        orderToComplete = order
+                                        showingCompleteAlert = true
+                                    } else {
+                                        // For other status changes (e.g., restore to pending from completed tab), apply directly
+                                        if let id = order.id {
+                                            store.updateOrderStatus(orderId: id, status: newStatus)
+                                        }
                                     }
                                 }
                             )
@@ -248,18 +257,6 @@ struct DashboardView: View {
                                     Label("Edit", systemImage: "pencil")
                                 }
                                 .tint(Theme.Slate.s400)
-                            }
-                            .swipeActions(edge: .leading) {
-                                if order.status == "pending" {
-                                    Button {
-                                        if let id = order.id {
-                                            store.updateOrderStatus(orderId: id, status: "completed")
-                                        }
-                                    } label: {
-                                        Label("Complete", systemImage: "checkmark.circle")
-                                    }
-                                    .tint(Theme.primary)
-                                }
                             }
                         }
                     }
@@ -295,6 +292,18 @@ struct DashboardView: View {
                     primaryButton: .destructive(Text("Delete")) {
                         if let id = orderToDelete?.id {
                             store.deleteOrder(orderId: id)
+                        }
+                    },
+                    secondaryButton: .cancel()
+                )
+            }
+            .alert(isPresented: $showingCompleteAlert) {
+                Alert(
+                    title: Text("Complete Order?"),
+                    message: Text("Mark the order for \(orderToComplete?.customerName ?? "this customer") as completed?"),
+                    primaryButton: .default(Text("Complete")) {
+                        if let id = orderToComplete?.id {
+                            store.updateOrderStatus(orderId: id, status: "completed")
                         }
                     },
                     secondaryButton: .cancel()

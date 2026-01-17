@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct ContentView: View {
     @StateObject var store = StoreService()
@@ -14,8 +15,14 @@ struct ContentView: View {
     var body: some View {
         Group {
             if store.isUserLoggedIn {
-                MainTabView()
-                    .environmentObject(store)
+                // Check if email is verified
+                if let currentUser = store.auth.currentUser, !currentUser.isEmailVerified {
+                    EmailVerificationView()
+                        .environmentObject(store)
+                } else {
+                    MainTabView()
+                        .environmentObject(store)
+                }
             } else {
                 LoginView()
                     .environmentObject(store)
