@@ -121,13 +121,7 @@ This project uses **Swift Package Manager (SPM)**, which is built directly into 
 ## 📱 Screenshots
 
 <p align="center">
-  <img src=".github/assets/screenshot_login.png" width="200" alt="Login Screen" />
-  <img src=".github/assets/screenshot_orders.png" width="200" alt="Orders Queue" />
-  <img src=".github/assets/screenshot_summary.png" width="200" alt="Production Summary" />
-  <img src=".github/assets/screenshot_sales.png" width="200" alt="Sales Report" />
-  <img src=".github/assets/screenshot_menu.png" width="200" alt="Menu Management" />
-  <img src=".github/assets/screenshot_new_order.png" width="200" alt="New Order Form" />
-  <img src=".github/assets/screenshot_settings.png" width="200" alt="Settings" />
+  <img src=".github/assets/screenshots.png" width="800" alt="App Screenshots" />
 </p>
 
 ## 📚 Documentation
