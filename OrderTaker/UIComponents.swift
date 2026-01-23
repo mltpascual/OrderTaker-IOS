@@ -29,6 +29,8 @@ struct ScaleButtonStyle: ButtonStyle {
     }
 }
 
+// MARK: - Order Card Component
+// This is the main list item view. Edit this struct to change how orders appear in the list.
 struct OrderCard: View {
     let order: CakeOrder
     var onDuplicate: () -> Void = {}
@@ -77,7 +79,9 @@ struct OrderCard: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            // Visual Anchor: Quantity Badge
+            // Left Side: Quantity Badge
+            // Edit the frame(width/height) below to change the box size
+            // Edit .background() to change the box color
             VStack {
                 Text("\(order.quantity)")
                     .font(.system(size: 20, weight: .black))
@@ -90,13 +94,32 @@ struct OrderCard: View {
             .background(Theme.primary.opacity(0.1))
             .cornerRadius(12)
             
-            // Middle Content: Info & Details
+            // Middle Section: Cake Name, Customer, Price
+            // Edit spacing here to change gap between text lines
             VStack(alignment: .leading, spacing: 4) {
-                // Customer Name + Source Badge
+                // --- LINE 1: CAKE NAME ---
+                // Edit font size/weight here to change Item Name appearance
+                Text(order.itemName)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(Theme.Slate.s900)
+
+                // --- LINE 2: DATE % PRICE---
+                HStack(spacing: 4) {
+                    Text("\(formattedDate) at \(formattedTime)")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(Theme.Slate.s900)
+                    Text("•")
+                        .foregroundColor(Theme.Slate.s400)
+                    Text("$\(String(format: "%.2f", order.total))")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Theme.Slate.s900)
+                }
+                // --- LINE 3: CUSTOMER NAME & SOURCE ---
+                // This HStack puts Customer Name and Badge side-by-side
                 HStack(spacing: 6) {
                     Text(order.customerName)
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(Theme.Slate.s900)
+                        .font(.system(size: 14))
+                        .foregroundColor(Theme.Slate.s600)
                     
                     // Source Badge
                     Text(order.source)
@@ -107,22 +130,7 @@ struct OrderCard: View {
                         .background(sourceColor(for: order.source))
                         .cornerRadius(6)
                 }
-                
-                Text(order.itemName)
-                    .font(.system(size: 14))
-                    .foregroundColor(Theme.Slate.s600)
-                
-                HStack(spacing: 4) {
-                    Text("$\(String(format: "%.2f", order.total))")
-                        .font(.system(size: 12, weight: .black))
-                        .foregroundColor(Theme.Slate.s900)
-                    Text("•")
-                        .foregroundColor(Theme.Slate.s400)
-                    Text("\(formattedDate) at \(formattedTime)")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(Theme.Slate.s500)
-                }
-                
+
                 if !order.notes.isEmpty {
                     Text(order.notes)
                         .font(.system(size: 11, weight: .medium))
@@ -134,7 +142,8 @@ struct OrderCard: View {
             
             Spacer()
             
-            // Right Actions Column
+            // Right Side: Action Buttons
+            // Edit this VStack to change or reorder the checkmark/duplicate buttons
             VStack(alignment: .center, spacing: 12) {
                 if order.status == "pending" {
                     Button(action: { onStatusChange("completed") }) {

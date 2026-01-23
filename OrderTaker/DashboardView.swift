@@ -71,10 +71,19 @@ struct DashboardView: View {
     }
     
     @State private var orderToEdit: CakeOrder? = nil
-    @State private var orderToDelete: CakeOrder? = nil
-    @State private var showingDeleteAlert: Bool = false
-    @State private var orderToComplete: CakeOrder? = nil
-    @State private var showingCompleteAlert: Bool = false
+    @State private var activeAlert: ActiveAlert? = nil
+    
+    enum ActiveAlert: Identifiable {
+        case delete(CakeOrder)
+        case complete(CakeOrder)
+        
+        var id: String {
+            switch self {
+            case .delete(let order): return "delete-\(order.id ?? UUID().uuidString)"
+            case .complete(let order): return "complete-\(order.id ?? UUID().uuidString)"
+            }
+        }
+    }
     
     var body: some View {
         NavigationView {
@@ -223,14 +232,12 @@ struct DashboardView: View {
                                 },
                                 onEdit: { orderToEdit = order },
                                 onDelete: {
-                                    orderToDelete = order
-                                    showingDeleteAlert = true
+                                    activeAlert = .delete(order)
                                 },
                                 onStatusChange: { newStatus in
                                     // Show confirmation for completing orders in Today and Pending tabs
                                     if newStatus == "completed" && (selectedTab == "Today" || selectedTab == "Pending") {
-                                        orderToComplete = order
-                                        showingCompleteAlert = true
+                                        activeAlert = .complete(order)
                                     } else {
                                         // For other status changes (e.g., restore to pending from completed tab), apply directly
                                         if let id = order.id {
@@ -245,8 +252,7 @@ struct DashboardView: View {
                             .listRowBackground(Color.clear)
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button(role: .destructive) {
-                                    orderToDelete = order
-                                    showingDeleteAlert = true
+                                    activeAlert = .delete(order)
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
@@ -269,7 +275,7 @@ struct DashboardView: View {
             }
             .background(Theme.background.ignoresSafeArea())
             .navigationBarHidden(true)
-            .onChange(of: selectedTab) { newTab in
+            .onChange(of: selectedTab) { _, newTab in
                 // Auto-switch sort option based on selected tab
                 if newTab == "Completed" {
                     sortOption = .dateLatest  // Latest first for completed orders
@@ -285,29 +291,31 @@ struct DashboardView: View {
                 SettingsView()
                     .environmentObject(store)
             }
-            .alert(isPresented: $showingDeleteAlert) {
-                Alert(
-                    title: Text("Delete Order?"),
-                    message: Text("Are you sure you want to delete the order for \(orderToDelete?.customerName ?? "this customer")? This action cannot be undone."),
-                    primaryButton: .destructive(Text("Delete")) {
-                        if let id = orderToDelete?.id {
-                            store.deleteOrder(orderId: id)
-                        }
-                    },
-                    secondaryButton: .cancel()
-                )
-            }
-            .alert(isPresented: $showingCompleteAlert) {
-                Alert(
-                    title: Text("Complete Order?"),
-                    message: Text("Mark the order for \(orderToComplete?.customerName ?? "this customer") as completed?"),
-                    primaryButton: .default(Text("Complete")) {
-                        if let id = orderToComplete?.id {
-                            store.updateOrderStatus(orderId: id, status: "completed")
-                        }
-                    },
-                    secondaryButton: .cancel()
-                )
+            .alert(item: $activeAlert) { alertType in
+                switch alertType {
+                case .delete(let order):
+                    return Alert(
+                        title: Text("Delete Order?"),
+                        message: Text("Are you sure you want to delete the order for \(order.customerName)? This action cannot be undone."),
+                        primaryButton: .destructive(Text("Delete")) {
+                            if let id = order.id {
+                                store.deleteOrder(orderId: id)
+                            }
+                        },
+                        secondaryButton: .cancel()
+                    )
+                case .complete(let order):
+                    return Alert(
+                        title: Text("Complete Order?"),
+                        message: Text("Mark the order for \(order.customerName) as completed?"),
+                        primaryButton: .default(Text("Complete")) {
+                            if let id = order.id {
+                                store.updateOrderStatus(orderId: id, status: "completed")
+                            }
+                        },
+                        secondaryButton: .cancel()
+                    )
+                }
             }
         }
     }

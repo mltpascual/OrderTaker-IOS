@@ -88,7 +88,7 @@ struct OrderFormView: View {
                                 .padding(14)
                                 .background(Theme.inputBackground)
                                 .cornerRadius(12)
-                                .onChange(of: quantity) { newValue in
+                                .onChange(of: quantity) { _, newValue in
                                     if itemName != "Custom Cake", 
                                        let item = store.menuItems.first(where: { $0.name == itemName }) {
                                         let qty = Int(newValue) ?? 0

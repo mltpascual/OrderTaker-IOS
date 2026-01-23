@@ -223,7 +223,10 @@ struct SettingsView: View {
                                 .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
                             }
                             .padding(.horizontal, 24)
+                            .padding(.horizontal, 24)
                         }
+
+
                     }
                     .padding(.vertical, 20)
                 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1520"
+   LastUpgradeVersion = "2620"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "05D59F1A2D3E49D900B79F02"
+               BlueprintIdentifier = "38B3B4DA2F19F55A003AAEDA"
                BuildableName = "OrderTaker.app"
                BlueprintName = "OrderTaker"
                ReferencedContainer = "container:OrderTaker.xcodeproj">
@@ -43,7 +43,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "05D59F1A2D3E49D900B79F02"
+            BlueprintIdentifier = "38B3B4DA2F19F55A003AAEDA"
             BuildableName = "OrderTaker.app"
             BlueprintName = "OrderTaker"
             ReferencedContainer = "container:OrderTaker.xcodeproj">
@@ -60,7 +60,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "05D59F1A2D3E49D900B79F02"
+            BlueprintIdentifier = "38B3B4DA2F19F55A003AAEDA"
             BuildableName = "OrderTaker.app"
             BlueprintName = "OrderTaker"
             ReferencedContainer = "container:OrderTaker.xcodeproj">
