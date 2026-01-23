@@ -19,6 +19,11 @@ OrderTaker is a comprehensive iOS application designed for bakery businesses to 
 - Duplicate orders with one tap
 - Filter by Today, Pending, or Completed
 
+### 🔔 Notifications
+- Local push notifications for upcoming orders
+- Automated reminders **15 minutes** and **5 minutes** before pickup
+- Smart synchronization ensuring alerts cancel if orders are completed or deleted
+
 ### 🎂 Menu Management
 - Dynamic menu with alphabetically sorted items
 - Add, edit, and delete menu items
@@ -152,6 +157,7 @@ OrderTaker/
 │   ├── SummaryView.swift     # Production summary
 │   └── SettingsView.swift    # Settings & CSV
 ├── Services/
+│   ├── NotificationManager.swift # Local notification scheduling
 │   └── StoreService.swift    # Firebase & data management
 ├── Theme/
 │   ├── Theme.swift           # App colors & fonts

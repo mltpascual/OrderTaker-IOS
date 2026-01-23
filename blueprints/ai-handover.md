@@ -31,6 +31,7 @@ This document serves as the primary context injection point for any AI agent tak
     *   Maintains real-time listeners for `orders` and `menuItems`.
     *   Provides CRUD methods with optimistic updates.
     *   Handles CSV import/export.
+*   **`NotificationManager.swift`**: Handles local push notification scheduling and permissions.
 *   **`Models.swift`**: Data models (`UserProfile`, `CakeOrder`, `CakeItem`, `OrderStatus` enum).
 *   **`Theme.swift`**: Centralized design system (colors, fonts, corner radii).
 *   **`UIComponents.swift`**: Reusable SwiftUI components (`PrimaryButton`, `OrderCard`, `InputField`, etc.).
@@ -97,7 +98,6 @@ This document serves as the primary context injection point for any AI agent tak
 *   The app is designed to look **premium** with a boutique bakery aesthetic.
 *   Current focus is on **speed of entry** and **visual clarity** for order management.
 *   Next logical steps (if requested) might involve:
-    *   Push notifications for order reminders.
     *   Image attachments for custom cake designs (requires Firebase Storage SDK).
     *   TestFlight distribution for beta testing.
 

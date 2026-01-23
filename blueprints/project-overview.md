@@ -64,6 +64,11 @@ The app is currently a fully functional native iOS application with:
    - Offline-first architecture with Firebase sync
    - Real-time cross-device synchronization
 
+7. **Notifications & Reminders**:
+   - **Automated Scheduling**: Local notifications triggered **15 minutes** and **5 minutes** before order pickup.
+   - **Smart Synchronization**: Notifications are automatically cancelled if an order is completed or deleted remotely.
+   - **Optimization**: Startup sync logic ignores orders older than 24 hours to prevent "alert spam" and ensure zero-lag performance on large datasets.
+
 ## App Structure
 
 ### Navigation

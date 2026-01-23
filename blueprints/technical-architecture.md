@@ -159,7 +159,22 @@ All calculations are derived client-side from the `orders` array in `ReportsView
 *   No environment variables are used; all config is handled by Firebase SDK.
 *   **Google Sign-In**: Requires custom URL scheme in `Info.plist` (Editor role, `com.google.gid` identifier).
 
-### 12. Email Verification Logic
+### 12. Notification Architecture
+*   **Manager Class**: `NotificationManager` (Singleton) handles all `UNUserNotificationCenter` interactions.
+*   **Triggers**:
+    - **15 Minutes Before**: "Upcoming Pickup" reminder.
+    - **5 Minutes Before**: "Customer Arriving" urgency alert.
+*   **Lifecycle Hooks**:
+    - `addOrder`: Immediately schedules notifications.
+    - `updateOrder`: Cancels old identifiers and reschedules with new time.
+    - `deleteOrder`: Cancels all associated notifications.
+    - `updateOrderStatus`: Cancels notifications if status becomes 'completed'.
+*   **Startup Optimization (CRITICAL)**:
+    - To prevent performance bottlenecks on startup with large datasets, `StoreService` applies a filter during the sync loop.
+    - **Rule**: If an order's pickup time is > 24 hours in the past, it is strictly ignored by the notification scheduler.
+    - This ensures that 1,000+ completed orders in the history do not trigger 1,000+ system calls to cancel notifications every time the app launches.
+
+### 13. Email Verification Logic
 *   **Parking Screen**: Unverified users (except those signed in via Google) are redirected to `EmailVerificationView` via `ContentView` logic.
 *   **Verification Check**: Checks `auth.currentUser.isEmailVerified` on app launch and login.
 *   **Sign Up Flow**: New email sign-ups are automatically sent a verification link and kept in the "parking" state until verified.
